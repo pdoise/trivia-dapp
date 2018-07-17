@@ -54,6 +54,7 @@ class App extends Component {
 
     setInterval(this.updateState.bind(this), 100)
     this.setEntryFee = this.setEntryFee.bind(this);
+    this.enroll = this.enroll.bind(this);
   }
 
   updateState() {
@@ -72,7 +73,7 @@ class App extends Component {
     if(this.state.owner === this.state.account) {
       this.setState({isOwner: true});
     }
-    // For testing when chaning accounts
+    // For testing when changing accounts
     if (this.state.web3.eth.accounts[0] !== this.state.account) {
       this.setState({account: this.state.web3.eth.accounts[0]});
       window.location.reload();
@@ -82,18 +83,26 @@ class App extends Component {
   setEntryFee(event){
     event.preventDefault();
     const data = new FormData(event.target);
-    const account = this.state.account
-
     var value = data.get('entryfee')
 
     this.setState({entryFee: value})
 
-    this.state.instance.setEntryFee(value, {from: account})
+    this.state.instance.setEntryFee(value, {from: this.state.account})
     .then(result => {
       return this.state.instance.entryFee.call()
     }).then(result => {
       return this.setState({entryFee: result.c[0]})
     })
+  }
+
+  enroll(event){
+    event.preventDefault();
+
+    this.state.instance.enroll({ 
+      gas: 3000000,
+      from: this.state.account,
+      value: this.state.web3.toWei(this.state.entryFee, 'ether')
+    });
   }
 
   render() {
@@ -118,6 +127,7 @@ class App extends Component {
                 <button>Submit</button>
               </form>
               <p>Number of players: {this.state.playerCount}</p>
+              <button onClick={this.enroll}>Play Now!</button>
             </div>
           </div>
         </main>

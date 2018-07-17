@@ -12,10 +12,14 @@ class App extends Component {
     super(props)
 
     this.state = {
-      storageValue: 0,
       web3: null,
       contract: null,
-      account: null
+      instance: null,
+      owner: null,
+      isOwner: false,
+      account: null,
+      entryFee: 0,
+      playerCount: 0
     }
   }
 
@@ -38,48 +42,57 @@ class App extends Component {
   }
 
   instantiateContract() {
-    /*
-     * SMART CONTRACT EXAMPLE
-     *
-     * Normally these functions would be called in the context of a
-     * state management library, but for convenience I've placed them here.
-     */
-
     const contract = require('truffle-contract')
     const trivia = contract(TriviaContract)
     trivia.setProvider(this.state.web3.currentProvider)
 
-    // Declaring this for later so we can chain functions on SimpleStorage.
-    var triviaInstance
-
-    // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       trivia.deployed().then((instance) => {
-        triviaInstance = instance
-
-        // Stores a given value, 5 by default.
-        return triviaInstance.set(5, {from: accounts[0]})
-      }).then((result) => {
-        // Get the value from the contract to prove it worked.
-        return triviaInstance.get.call(accounts[0])
-      }).then((result) => {
-        // Update state with the result.
-        return this.setState({ storageValue: result.c[0], contract:  triviaInstance, account: accounts[0] })
+        return this.setState({ account: accounts[0], contract: trivia, instance: instance })
       })
     })
+
+    setInterval(this.updateState.bind(this), 100)
+    this.setEntryFee = this.setEntryFee.bind(this);
   }
 
-  handleClick(event){
-    const contract = this.state.contract
+  updateState() {
+    this.state.contract.deployed().then((instance) => {
+      return this.state.instance.entryFee.call();
+    }).then((result) => {
+      this.setState({entryFee: result.c[0]});
+      return this.state.instance.owner.call();
+    }).then((result) => {
+      this.setState({owner: result});
+      return this.state.instance.getPlayerCount.call();
+    }).then((result) => {
+      this.setState({playerCount: result.c[0]});
+    })
+    
+    if(this.state.owner === this.state.account) {
+      this.setState({isOwner: true});
+    }
+    // For testing when chaning accounts
+    if (this.state.web3.eth.accounts[0] !== this.state.account) {
+      this.setState({account: this.state.web3.eth.accounts[0]});
+      window.location.reload();
+    }
+  }
+
+  setEntryFee(event){
+    event.preventDefault();
+    const data = new FormData(event.target);
     const account = this.state.account
 
-    var value = 3
+    var value = data.get('entryfee')
 
-    contract.set(value, {from: account})
+    this.setState({entryFee: value})
+
+    this.state.instance.setEntryFee(value, {from: account})
     .then(result => {
-      return contract.get.call()
+      return this.state.instance.entryFee.call()
     }).then(result => {
-      return this.setState({storageValue: result.c[0]})
+      return this.setState({entryFee: result.c[0]})
     })
   }
 
@@ -93,13 +106,18 @@ class App extends Component {
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.state.storageValue}</p>
-              <button onClick={this.handleClick.bind(this)}>Set Storage</button>
+              <h2>Trivia Dapp</h2>
+              <p>The entry fee is: {this.state.entryFee}  ether</p>
+              <form onSubmit={this.setEntryFee} hidden={!this.state.isOwner}>
+                <label htmlFor="entryfee">Set Entry Fee:</label><br />
+                <input 
+                  id="entryfee" 
+                  name="entryfee" 
+                  type="number" 
+                  placeholder="ether" />      
+                <button>Submit</button>
+              </form>
+              <p>Number of players: {this.state.playerCount}</p>
             </div>
           </div>
         </main>

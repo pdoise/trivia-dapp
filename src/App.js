@@ -19,7 +19,10 @@ class App extends Component {
       isOwner: false,
       account: null,
       entryFee: 0,
-      playerCount: 0
+      playerCount: 0,
+      question: '',
+      answers: [],
+      correctAnswer: null
     }
   }
 
@@ -45,16 +48,48 @@ class App extends Component {
     const contract = require('truffle-contract')
     const trivia = contract(TriviaContract)
     trivia.setProvider(this.state.web3.currentProvider)
-
+    
+    //Set init state variables
     this.state.web3.eth.getAccounts((error, accounts) => {
       trivia.deployed().then((instance) => {
         return this.setState({ account: accounts[0], contract: trivia, instance: instance })
       })
     })
 
+    //Retrieve trivia questions from api and display them
+    fetch('https://opentdb.com/api.php?amount=1&category=9&type=multiple').then(results => {
+      return results.json();
+    }).then(data => {
+      this.setState({question: data.results[0].question})
+      let allAnswers = data.results[0].incorrect_answers
+      let correctAnswer = data.results[0].correct_answer
+      allAnswers.push(correctAnswer)
+      shuffleArray(allAnswers)
+
+      allAnswers.map(function(answer){
+        if (answer === correctAnswer) {
+          return answer
+        }
+      })
+      let answers = allAnswers.map((answer, index) => {
+        return(
+          <div key={answer}>
+            <button 
+              onClick={(e) => this.giveAnswer(index, e)}
+              dangerouslySetInnerHTML={{ __html: answer}}>
+            </button><br /><br />
+          </div>
+        )
+      })
+      this.setState({answers: answers})
+    })
+    
+    //Watchers
     setInterval(this.updateState.bind(this), 100)
+
+    //Bind methods
     this.setEntryFee = this.setEntryFee.bind(this);
-    this.enroll = this.enroll.bind(this);
+    this.giveAnswer = this.giveAnswer.bind(this);
   }
 
   updateState() {
@@ -95,10 +130,10 @@ class App extends Component {
     })
   }
 
-  enroll(event){
+  giveAnswer(index, event) {
     event.preventDefault();
 
-    this.state.instance.enroll({ 
+    this.state.instance.giveAnswer(index, { 
       gas: 3000000,
       from: this.state.account,
       value: this.state.web3.toWei(this.state.entryFee, 'ether')
@@ -127,13 +162,27 @@ class App extends Component {
                 <button>Submit</button>
               </form>
               <p>Number of players: {this.state.playerCount}</p>
-              <button onClick={this.enroll}>Play Now!</button>
+              <div>
+                <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
+                {this.state.answers}
+              </div>
             </div>
           </div>
         </main>
       </div>
     );
   }
+}
+
+function shuffleArray(array) {
+  let i = array.length - 1;
+  for (; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
 }
 
 export default App

@@ -45,6 +45,7 @@ code {
 
 .navbar a {
   color: #fff;
+  font-size: 125;
 }
 
 .navbar a:active,

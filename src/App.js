@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import TriviaContract from '../build/contracts/Trivia.json'
 import getWeb3 from './utils/getWeb3'
+import { Button, Row, Col, Input, CardPanel } from 'react-materialize';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -20,6 +21,8 @@ class App extends Component {
       account: null,
       entryFee: 0,
       playerCount: 0,
+      playerWinCount: 0,
+      playerLossCount: 0,
       question: '',
       answers: [],
       correctAnswer: null
@@ -74,10 +77,9 @@ class App extends Component {
       let answers = allAnswers.map((answer, index) => {
         return(
           <div key={answer}>
-            <button 
-              onClick={(e) => this.giveAnswer(index, e)}
-              dangerouslySetInnerHTML={{ __html: answer}}>
-            </button><br /><br />
+            <Button
+              onClick={(e) => this.giveAnswer(index, e)}>{answer}
+            </Button><br /><br />
           </div>
         )
       })
@@ -105,6 +107,7 @@ class App extends Component {
       this.setState({playerCount: result.c[0]});
     })
     
+    // Check if current user is owner of the contract
     if(this.state.owner === this.state.account) {
       this.setState({isOwner: true});
     }
@@ -120,13 +123,11 @@ class App extends Component {
     const data = new FormData(event.target);
     var value = data.get('entryfee')
 
-    this.setState({entryFee: value})
-
     this.state.instance.setEntryFee(value, {from: this.state.account})
     .then(result => {
       return this.state.instance.entryFee.call()
     }).then(result => {
-      return this.setState({entryFee: result.c[0]})
+      this.setState({entryFee: result.c[0]})
     })
   }
 
@@ -143,31 +144,42 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
-        </nav>
-
-        <main className="container">
-          <div className="pure-g">
-            <div className="pure-u-1-1">
-              <h2>Trivia Dapp</h2>
-              <p>The entry fee is: {this.state.entryFee}  ether</p>
-              <form onSubmit={this.setEntryFee} hidden={!this.state.isOwner}>
-                <label htmlFor="entryfee">Set Entry Fee:</label><br />
-                <input 
-                  id="entryfee" 
-                  name="entryfee" 
-                  type="number" 
-                  placeholder="ether" />      
-                <button>Submit</button>
-              </form>
-              <p>Number of players: {this.state.playerCount}</p>
-              <div>
-                <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
-                {this.state.answers}
-              </div>
-            </div>
+        <nav>
+          <div className="nav-wrapper">
+            <a className="brand-logo center">Perpetual Decentralized Trivia</a>
           </div>
+        </nav>
+        <main className="container">
+          <Row className="center-align">
+            <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
+            {this.state.answers}
+          </Row>
+          <Row>
+            <Col m={6} s={12}>
+              <CardPanel className="teal lighten-4 black-text">
+                <strong>Game Info</strong>
+                <div>The Entry Fee is: {this.state.entryFee} ether</div>
+                <div>Number of players: {this.state.playerCount}</div>
+              </CardPanel>
+            </Col>
+            <Col m={6} s={12}>
+              <CardPanel className="teal lighten-4 black-text">
+                <strong>Player Info</strong>
+                <div>Wins: {this.state.playerWinCount}</div>
+                <div>Losses: {this.state.playerLossCount}</div>
+              </CardPanel>
+            </Col>
+          </Row>
+          <form onSubmit={this.setEntryFee} hidden={!this.state.isOwner}>
+            <p>Admin Funtions:</p>
+            <Input 
+              s={3}
+              id="entryfee" 
+              name="entryfee" 
+              type="number"
+              placeholder="Set Entry Fee in ether" />
+            <Button>Submit</Button>
+          </form>
         </main>
       </div>
     );

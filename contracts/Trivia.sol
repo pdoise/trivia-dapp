@@ -12,6 +12,8 @@ contract Trivia {
     struct Player {
         uint256 entryFee;
         uint256 answer;
+        uint256 wins;
+        uint256 losses;
     }
 
     modifier verifyOwner() {require(owner == msg.sender); _;}
@@ -40,6 +42,14 @@ contract Trivia {
         require(msg.value >= entryFee);
         playerInfo[msg.sender].entryFee = msg.value;
         players.push(msg.sender);
+    }
+
+    function getPlayerWins() public constant returns(uint) {
+        return playerInfo[msg.sender].wins;
+    }
+
+    function getPlayerLosses() public constant returns(uint) {
+        return playerInfo[msg.sender].losses;
     }
   
     function getPlayerCount() public constant returns(uint) {

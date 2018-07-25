@@ -16,6 +16,14 @@ contract Trivia {
         uint256 losses;
     }
 
+    struct Question {
+        string question;
+        string answer;
+        string incorrectOne;
+        string incorrectTwo;
+        string incorrectTree;
+    }
+
     modifier verifyOwner() {require(owner == msg.sender); _;}
 
     function Trivia() public {

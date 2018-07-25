@@ -67,3 +67,7 @@ code {
   height: 16px;
   margin-right: 10px;
 }
+
+.nav-wrapper {
+  padding-left: 15px;
+}

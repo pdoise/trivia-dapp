@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import TriviaContract from '../build/contracts/Trivia.json'
 import getWeb3 from './utils/getWeb3'
-import { Button, Row, Col, Input, CardPanel } from 'react-materialize';
+import { Navbar, NavItem, Button, Row, Col, Input, CardPanel } from 'react-materialize';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -11,6 +11,10 @@ import './App.css'
 class App extends Component {
   constructor(props) {
     super(props)
+
+    this.giveAnswer = this.giveAnswer.bind(this);
+    this.giveAnswer = this.giveAnswer.bind(this);
+    this.setEntryFee = this.setEntryFee.bind(this);
 
     this.state = {
       web3: null,
@@ -30,16 +34,11 @@ class App extends Component {
   }
 
   componentWillMount() {
-    // Get network provider and web3 instance.
-    // See utils/getWeb3 for more info.
-
     getWeb3
     .then(results => {
       this.setState({
         web3: results.web3
       })
-
-      // Instantiate contract once web3 provided.
       this.instantiateContract()
     })
     .catch(() => {
@@ -87,35 +86,58 @@ class App extends Component {
     })
     
     //Watchers
-    setInterval(this.updateState.bind(this), 100)
-
-    //Bind methods
-    this.setEntryFee = this.setEntryFee.bind(this);
-    this.giveAnswer = this.giveAnswer.bind(this);
+    setInterval(this.updateState.bind(this), 500)
   }
 
   updateState() {
-    this.state.contract.deployed().then((instance) => {
-      return this.state.instance.entryFee.call();
-    }).then((result) => {
-      this.setState({entryFee: result.c[0]});
-      return this.state.instance.owner.call();
-    }).then((result) => {
-      this.setState({owner: result});
-      return this.state.instance.getPlayerCount.call();
-    }).then((result) => {
-      this.setState({playerCount: result.c[0]});
-    })
-    
-    // Check if current user is owner of the contract
-    if(this.state.owner === this.state.account) {
-      this.setState({isOwner: true});
+    if (this.state.contract != null) {
+      this.state.contract.deployed().then((instance) => {
+        return this.state.instance.entryFee.call();
+      }).then((result) => {
+        this.setState({entryFee: result.c[0]});
+        return this.state.instance.owner.call();
+      }).then((result) => {
+        this.setState({owner: result});
+        return this.state.instance.getPlayerCount.call();
+      }).then((result) => {
+        this.setState({playerCount: result.c[0]});
+      })
+      
+      // Check if current user is owner of the contract
+      if(this.state.owner === this.state.account) {
+        this.setState({isOwner: true});
+      }
+      // For testing when changing accounts
+      if (this.state.web3.eth.accounts[0] !== this.state.account) {
+        this.setState({account: this.state.web3.eth.accounts[0]});
+        window.location.reload();
+      }
     }
-    // For testing when changing accounts
-    if (this.state.web3.eth.accounts[0] !== this.state.account) {
-      this.setState({account: this.state.web3.eth.accounts[0]});
-      window.location.reload();
-    }
+  }
+
+  giveAnswer(index, event) {
+    event.preventDefault();
+
+    this.state.instance.giveAnswer(index, { 
+      gas: 3000000,
+      from: this.state.account,
+      value: this.state.web3.toWei(this.state.entryFee, 'ether')
+    });
+  }
+
+  submitQuestion(event){
+    event.preventDefault();
+    const data = new FormData(event.target);
+    var question = data.get('question')
+    var answer = data.get('answer')
+    var incorrectOne = data.get('incorrectOne')
+    var incorrectTwo = data.get('incorrectTwo')
+    var incorrectThree = data.get('incorrectThree')
+    console.log(question)
+    console.log(answer)
+    console.log(incorrectOne)
+    console.log(incorrectTwo)
+    console.log(incorrectThree)
   }
 
   setEntryFee(event){
@@ -131,24 +153,13 @@ class App extends Component {
     })
   }
 
-  giveAnswer(index, event) {
-    event.preventDefault();
-
-    this.state.instance.giveAnswer(index, { 
-      gas: 3000000,
-      from: this.state.account,
-      value: this.state.web3.toWei(this.state.entryFee, 'ether')
-    });
-  }
-
   render() {
     return (
       <div className="App">
-        <nav>
-          <div className="nav-wrapper">
-            <a className="brand-logo center">Perpetual Decentralized Trivia</a>
-          </div>
-        </nav>
+        <Navbar brand='Perpetual Decentralized Trivia' right>
+          <NavItem onClick={() => console.log('test click')}>Getting started</NavItem>
+          <NavItem href='components.html'>Components</NavItem>
+        </Navbar>
         <main className="container">
           <Row className="center-align">
             <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
@@ -170,6 +181,42 @@ class App extends Component {
               </CardPanel>
             </Col>
           </Row>
+          <form onSubmit={this.submitQuestion}>
+            <p>Submit your own question:</p>
+            <Input 
+              s={3}
+              id="question" 
+              name="question" 
+              type="text"
+              placeholder="Question" />
+            <p>Input the correct answer:</p>
+            <Input 
+              s={3}
+              id="answer" 
+              name="answer" 
+              type="text"
+              placeholder="Answer" />
+            <p>Input three incorrect answers:</p>
+            <Input 
+              s={3}
+              id="incorrect-one" 
+              name="incorrectOne" 
+              type="text" 
+              placeholder="Incorrect Answer One"/>
+            <Input 
+              s={3}
+              id="incorrect-two" 
+              name="incorrectTwo" 
+              type="text" 
+              placeholder="Incorrect Answer Two"/>
+            <Input 
+              s={3}
+              id="incorrect-three" 
+              name="incorrectThree" 
+              type="text" 
+              placeholder="Incorrect Answer Three"/>
+            <Button>Submit</Button>
+          </form>
           <form onSubmit={this.setEntryFee} hidden={!this.state.isOwner}>
             <p>Admin Funtions:</p>
             <Input 

@@ -1,20 +1,13 @@
 import React, { Component } from 'react'
 import TriviaContract from '../build/contracts/Trivia.json'
 import getWeb3 from './utils/getWeb3'
-import { Navbar, NavItem, Button, Row, Col, Input, CardPanel } from 'react-materialize';
-
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './App.css'
+import { Button, Row, Col, CardPanel } from 'react-materialize';
 
 class App extends Component {
   constructor(props) {
     super(props)
 
     this.giveAnswer = this.giveAnswer.bind(this);
-    this.giveAnswer = this.giveAnswer.bind(this);
-    this.setEntryFee = this.setEntryFee.bind(this);
 
     this.state = {
       web3: null,
@@ -29,7 +22,8 @@ class App extends Component {
       playerLossCount: 0,
       question: '',
       answers: [],
-      correctAnswer: null
+      correctAnswer: null,
+      updateState: null
     }
   }
 
@@ -69,9 +63,11 @@ class App extends Component {
       shuffleArray(allAnswers)
 
       allAnswers.map(function(answer){
+        let _answer
         if (answer === correctAnswer) {
-          return answer
+          _answer = answer
         }
+        return _answer
       })
       let answers = allAnswers.map((answer, index) => {
         return(
@@ -85,8 +81,14 @@ class App extends Component {
       this.setState({answers: answers})
     })
     
-    //Watchers
-    setInterval(this.updateState.bind(this), 500)
+  }
+
+  componentDidMount() {
+    this.updateState = setInterval(this.updateState.bind(this), 500)
+  }
+
+  componentWillUnmount () {
+    clearInterval(this.updateState);
   }
 
   updateState() {
@@ -125,41 +127,9 @@ class App extends Component {
     });
   }
 
-  submitQuestion(event){
-    event.preventDefault();
-    const data = new FormData(event.target);
-    var question = data.get('question')
-    var answer = data.get('answer')
-    var incorrectOne = data.get('incorrectOne')
-    var incorrectTwo = data.get('incorrectTwo')
-    var incorrectThree = data.get('incorrectThree')
-    console.log(question)
-    console.log(answer)
-    console.log(incorrectOne)
-    console.log(incorrectTwo)
-    console.log(incorrectThree)
-  }
-
-  setEntryFee(event){
-    event.preventDefault();
-    const data = new FormData(event.target);
-    var value = data.get('entryfee')
-
-    this.state.instance.setEntryFee(value, {from: this.state.account})
-    .then(result => {
-      return this.state.instance.entryFee.call()
-    }).then(result => {
-      this.setState({entryFee: result.c[0]})
-    })
-  }
-
   render() {
     return (
       <div className="App">
-        <Navbar brand='Perpetual Decentralized Trivia' right>
-          <NavItem onClick={() => console.log('test click')}>Getting started</NavItem>
-          <NavItem href='components.html'>Components</NavItem>
-        </Navbar>
         <main className="container">
           <Row className="center-align">
             <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
@@ -181,52 +151,6 @@ class App extends Component {
               </CardPanel>
             </Col>
           </Row>
-          <form onSubmit={this.submitQuestion}>
-            <p>Submit your own question:</p>
-            <Input 
-              s={3}
-              id="question" 
-              name="question" 
-              type="text"
-              placeholder="Question" />
-            <p>Input the correct answer:</p>
-            <Input 
-              s={3}
-              id="answer" 
-              name="answer" 
-              type="text"
-              placeholder="Answer" />
-            <p>Input three incorrect answers:</p>
-            <Input 
-              s={3}
-              id="incorrect-one" 
-              name="incorrectOne" 
-              type="text" 
-              placeholder="Incorrect Answer One"/>
-            <Input 
-              s={3}
-              id="incorrect-two" 
-              name="incorrectTwo" 
-              type="text" 
-              placeholder="Incorrect Answer Two"/>
-            <Input 
-              s={3}
-              id="incorrect-three" 
-              name="incorrectThree" 
-              type="text" 
-              placeholder="Incorrect Answer Three"/>
-            <Button>Submit</Button>
-          </form>
-          <form onSubmit={this.setEntryFee} hidden={!this.state.isOwner}>
-            <p>Admin Funtions:</p>
-            <Input 
-              s={3}
-              id="entryfee" 
-              name="entryfee" 
-              type="number"
-              placeholder="Set Entry Fee in ether" />
-            <Button>Submit</Button>
-          </form>
         </main>
       </div>
     );

@@ -7,10 +7,7 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    this.giveAnswer = this.giveAnswer.bind(this);
-    this.timer = 0;
-    this.startTimer = this.startTimer.bind(this);
-    this.countDown = this.countDown.bind(this);
+    this.joinGame = this.joinGame.bind(this);
 
     this.state = {
       web3: null,
@@ -26,8 +23,7 @@ class App extends Component {
       correctAnswer: null,
       answers: [],
       answerButtons: [],
-      time: {},
-      seconds: 5
+      stage: 0
     }
   }
 
@@ -57,50 +53,45 @@ class App extends Component {
       }).then((result) => {
         this.setState({ question: result[0], correctAnswer: result[1], answers: shuffleArray(result.splice(1,3)) })
       })
-    })
-
-    //Retrieve trivia questions from api and display them
-    //fetch('https://opentdb.com/api.php?amount=1&category=9&type=multiple').then(results => {
-    //  return results.json();
-    //}).then(data => {
-
-    //shuffleArray(this.state.answers)
-    
+    })    
   }
 
   componentDidMount() {
     this.updateState = setInterval(this.updateState.bind(this), 500)
     this.updateGame = setInterval(this.updateGame.bind(this), 1000)
-    let timeLeftVar = this.secondsToTime(this.state.seconds);
-    this.setState({ time: timeLeftVar });
   }
 
   componentWillUnmount () {
     clearInterval(this.updateState);
+    clearInterval(this.updateGame);
   }
 
   updateState() {
     if (this.state.contract != null) {
       this.state.contract.deployed().then((instance) => {
-        return this.state.instance.entryFee.call();
+        return this.state.instance.entryFee.call()
       }).then((result) => {
-        this.setState({entryFee: result.c[0]});
+        this.setState({entryFee: result.c[0]})
         return this.state.instance.owner.call();
       }).then((result) => {
-        this.setState({owner: result});
+        this.setState({owner: result})
         return this.state.instance.getPlayerCount.call();
       }).then((result) => {
-        this.setState({playerCount: result.c[0]});
+        this.setState({playerCount: result.c[0]})
+        return this.state.instance.stage.call()
+      }).then((result) => {
+        console.log(result.c[0])
+        this.setState({stage: result.c[0]})
       })
       
       // Check if current user is owner of the contract
       if(this.state.owner === this.state.account) {
-        this.setState({isOwner: true});
+        this.setState({isOwner: true})
       }
       // For testing when changing accounts
       if (this.state.web3.eth.accounts[0] !== this.state.account) {
-        this.setState({account: this.state.web3.eth.accounts[0]});
-        window.location.reload();
+        this.setState({account: this.state.web3.eth.accounts[0]})
+        window.location.reload()
       }
     }
   }
@@ -118,54 +109,10 @@ class App extends Component {
     this.setState({answerButtons: answerButtons});
   }
 
-  secondsToTime(secs){
-    let hours = Math.floor(secs / (60 * 60));
-
-    let divisor_for_minutes = secs % (60 * 60);
-    let minutes = Math.floor(divisor_for_minutes / 60);
-
-    let divisor_for_seconds = divisor_for_minutes % 60;
-    let seconds = Math.ceil(divisor_for_seconds);
-
-    let obj = {
-      "h": hours,
-      "m": minutes,
-      "s": seconds
-    };
-    return obj;
-  }
-
-  countDown() {
-    // Remove one second, set state so a re-render happens.
-    let seconds = this.state.seconds - 1;
-    this.setState({
-      time: this.secondsToTime(seconds),
-      seconds: seconds,
-    });
-    
-    // Check if we're at zero.
-    if (seconds === 0) { 
-      clearInterval(this.timer);
-    }
-  }
-
-  startTimer() {
-    if (this.timer === 0) {
-      this.timer = setInterval(this.countDown, 1000);
-    }
-  }
-
-  giveAnswer(answer, event) {
+  joinGame(event) {
     event.preventDefault();
 
-    let isCorrect = false;
-    if (this.state.correctAnswer === answer ) {
-      isCorrect = true;
-    }
-    
-    console.log(isCorrect)
-
-    this.state.instance.giveAnswer(isCorrect, { 
+    this.state.instance.payEntryFee(this.state.entryFee, { 
       gas: 3000000,
       from: this.state.account,
       value: this.state.web3.toWei(this.state.entryFee, 'ether')
@@ -176,14 +123,6 @@ class App extends Component {
     return (
       <div className="App">
         <main className="container">
-          <div>
-            <button onClick={this.startTimer}>Start</button>
-            m: {this.state.time.m} s: {this.state.time.s}
-          </div>
-          <Row className="center-align">
-            <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
-            {this.state.answerButtons}
-          </Row>
           <Row>
             <Col m={6} s={12}>
               <CardPanel className="teal lighten-4 black-text">
@@ -199,6 +138,17 @@ class App extends Component {
                 <div>Losses: {this.state.playerLossCount}</div>
               </CardPanel>
             </Col>
+          </Row>
+          <Row className="center-align" hidden={this.state.stage !== 0}>
+            <h1>Play Trivia for {this.state.entryFee} ether</h1>
+            <p>At least two players required to start game</p>
+            <Button
+              onClick={(e) => this.joinGame(e)}>Join Now
+            </Button>
+          </Row>
+          <Row className="center-align" hidden={this.state.stage !== 1}>
+            <h1>{this.state.question}</h1>
+            {this.state.answerButtons}
           </Row>
         </main>
       </div>

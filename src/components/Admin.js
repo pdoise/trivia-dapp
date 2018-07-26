@@ -65,11 +65,6 @@ class Admin extends Component {
       }).then((result) => {
         this.setState({owner: result});
       })
-      
-      // Check if current user is owner of the contract
-      if(this.state.owner === this.state.account) {
-        this.setState({isOwner: true});
-      }
       // For testing when changing accounts
       if (this.state.web3.eth.accounts[0] !== this.state.account) {
         this.setState({account: this.state.web3.eth.accounts[0]});
@@ -95,7 +90,7 @@ class Admin extends Component {
     return (
       <div className="App">
         <main className="container">
-          <form onSubmit={this.setEntryFee} hidden={!this.state.isOwner}>
+          <form onSubmit={this.setEntryFee}>
             <p>Admin Funtions:</p>
             <Input 
               s={3}

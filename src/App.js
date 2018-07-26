@@ -14,16 +14,15 @@ class App extends Component {
       contract: null,
       instance: null,
       owner: null,
-      isOwner: false,
       account: null,
       entryFee: 0,
       playerCount: 0,
       playerWinCount: 0,
       playerLossCount: 0,
       question: '',
-      answers: [],
       correctAnswer: null,
-      updateState: null
+      answers: [],
+      answerButtons: []
     }
   }
 
@@ -48,43 +47,25 @@ class App extends Component {
     //Set init state variables
     this.state.web3.eth.getAccounts((error, accounts) => {
       trivia.deployed().then((instance) => {
-        return this.setState({ account: accounts[0], contract: trivia, instance: instance })
+        this.setState({ account: accounts[0], contract: trivia, instance: instance })
+        return this.state.instance.questions.call(0);
+      }).then((result) => {
+        this.setState({ question: result[0], correctAnswer: result[1], answers: shuffleArray(result.splice(1,3)) })
       })
     })
 
     //Retrieve trivia questions from api and display them
-    fetch('https://opentdb.com/api.php?amount=1&category=9&type=multiple').then(results => {
-      return results.json();
-    }).then(data => {
-      this.setState({question: data.results[0].question})
-      let allAnswers = data.results[0].incorrect_answers
-      let correctAnswer = data.results[0].correct_answer
-      allAnswers.push(correctAnswer)
-      shuffleArray(allAnswers)
+    //fetch('https://opentdb.com/api.php?amount=1&category=9&type=multiple').then(results => {
+    //  return results.json();
+    //}).then(data => {
 
-      allAnswers.map(function(answer){
-        let _answer
-        if (answer === correctAnswer) {
-          _answer = answer
-        }
-        return _answer
-      })
-      let answers = allAnswers.map((answer, index) => {
-        return(
-          <div key={answer}>
-            <Button
-              onClick={(e) => this.giveAnswer(index, e)}>{answer}
-            </Button><br /><br />
-          </div>
-        )
-      })
-      this.setState({answers: answers})
-    })
+    //shuffleArray(this.state.answers)
     
   }
 
   componentDidMount() {
     this.updateState = setInterval(this.updateState.bind(this), 500)
+    this.updateGame = setInterval(this.updateGame.bind(this), 1000)
   }
 
   componentWillUnmount () {
@@ -117,10 +98,30 @@ class App extends Component {
     }
   }
 
-  giveAnswer(index, event) {
+  updateGame() {
+    let answerButtons = this.state.answers.map((answer) => {
+      return(
+        <div key={answer}>
+          <Button
+            onClick={(e) => this.giveAnswer(answer, e)}>{answer}
+          </Button><br /><br />
+        </div>
+      )
+    })
+    this.setState({answerButtons: answerButtons});
+  }
+
+  giveAnswer(answer, event) {
     event.preventDefault();
 
-    this.state.instance.giveAnswer(index, { 
+    let isCorrect = false;
+    if (this.state.correctAnswer === answer ) {
+      isCorrect = true;
+    }
+    
+    console.log(isCorrect)
+
+    this.state.instance.giveAnswer(isCorrect, { 
       gas: 3000000,
       from: this.state.account,
       value: this.state.web3.toWei(this.state.entryFee, 'ether')
@@ -133,7 +134,7 @@ class App extends Component {
         <main className="container">
           <Row className="center-align">
             <h1 dangerouslySetInnerHTML={{ __html: this.state.question}}></h1>
-            {this.state.answers}
+            {this.state.answerButtons}
           </Row>
           <Row>
             <Col m={6} s={12}>

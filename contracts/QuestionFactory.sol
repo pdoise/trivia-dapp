@@ -10,7 +10,6 @@ contract QuestionFactory {
         string answer;
         string incorrectOne;
         string incorrectTwo;
-        string incorrectTree;
         bool approved;
     }
 
@@ -19,11 +18,11 @@ contract QuestionFactory {
     mapping (uint => address) public questionToOwner;
     mapping (address => uint) ownerQuestionCount;
 
-    function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo, string _incorrectTree) public {
-        uint question = questions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo, _incorrectTree, false));
+    function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo) public {
+        uint question = questions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo, false));
  
         questionToOwner[question] = msg.sender;
-        QuestionCreated(_question);
+        emit QuestionCreated(_question);
     }
 
 }

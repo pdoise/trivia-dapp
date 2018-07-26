@@ -22,6 +22,7 @@ contract Trivia is QuestionFactory {
     function Trivia() public {
         owner = msg.sender;
         entryFee = 1;
+        questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation", false));
     }
 
     // Admin function to set a different entry fee
@@ -38,7 +39,7 @@ contract Trivia is QuestionFactory {
         return false;
     }
 
-    function giveAnswer(uint256 selectedAnswer) public payable {
+    function giveAnswer(bool isCorrect) public payable {
         require(!alreadyPlaying(msg.sender));
         require(msg.value >= entryFee);
         playerInfo[msg.sender].entryFee = msg.value;

@@ -50,10 +50,9 @@ class QuestionSubmit extends Component {
     var answer = data.get('answer')
     var incorrectOne = data.get('incorrectOne')
     var incorrectTwo = data.get('incorrectTwo')
-    var incorrectThree = data.get('incorrectThree')
     event.preventDefault();
 
-    this.state.instance.createQuestion(question, answer, incorrectOne, incorrectTwo, incorrectThree, { 
+    this.state.instance.createQuestion(question, answer, incorrectOne, incorrectTwo, { 
       gas: 3000000,
       from: this.state.account
     });
@@ -78,7 +77,7 @@ class QuestionSubmit extends Component {
               name="answer" 
               type="text"
               placeholder="Answer" />
-            <p>Input three incorrect answers:</p>
+            <p>Input two incorrect answers:</p>
             <Input 
               s={3}
               id="incorrect-one" 
@@ -91,12 +90,6 @@ class QuestionSubmit extends Component {
               name="incorrectTwo" 
               type="text" 
               placeholder="Incorrect Answer Two"/>
-            <Input 
-              s={3}
-              id="incorrect-three" 
-              name="incorrectThree" 
-              type="text" 
-              placeholder="Incorrect Answer Three"/>
             <Button>Submit</Button>
           </form>
         </main>

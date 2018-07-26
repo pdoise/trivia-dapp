@@ -1,7 +1,8 @@
 pragma solidity ^0.4.18;
 
+import "./QuestionFactory.sol";
 
-contract Trivia {
+contract Trivia is QuestionFactory {
     address public owner;
     uint public entryFee;
     uint256 public totalFees;
@@ -14,14 +15,6 @@ contract Trivia {
         uint256 answer;
         uint256 wins;
         uint256 losses;
-    }
-
-    struct Question {
-        string question;
-        string answer;
-        string incorrectOne;
-        string incorrectTwo;
-        string incorrectTree;
     }
 
     modifier verifyOwner() {require(owner == msg.sender); _;}

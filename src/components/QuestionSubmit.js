@@ -1,7 +1,47 @@
 import React, { Component } from 'react'
 import { Input, Button } from 'react-materialize';
+import QuestionContract from '../../build/contracts/QuestionFactory.json'
+import getWeb3 from './../utils/getWeb3'
 
 class QuestionSubmit extends Component {
+
+  constructor(props) {
+    super(props)
+
+    this.submitQuestion = this.submitQuestion.bind(this);
+
+    this.state = {
+      web3: null,
+      contract: null,
+      instance: null,
+    }
+  }
+
+  componentWillMount() {
+    getWeb3
+    .then(results => {
+      this.setState({
+        web3: results.web3
+      })
+      this.instantiateContract()
+    })
+    .catch(() => {
+      console.log('Error finding web3.')
+    })
+  }
+
+  instantiateContract() {
+    const contract = require('truffle-contract')
+    const question = contract(QuestionContract)
+    question.setProvider(this.state.web3.currentProvider)
+    
+    //Set init state variables
+    this.state.web3.eth.getAccounts((error, accounts) => {
+      question.deployed().then((instance) => {
+        return this.setState({ account: accounts[0], contract: question, instance: instance })
+      })
+    })
+  }
 
   submitQuestion(event){
     event.preventDefault();
@@ -11,11 +51,12 @@ class QuestionSubmit extends Component {
     var incorrectOne = data.get('incorrectOne')
     var incorrectTwo = data.get('incorrectTwo')
     var incorrectThree = data.get('incorrectThree')
-    console.log(question)
-    console.log(answer)
-    console.log(incorrectOne)
-    console.log(incorrectTwo)
-    console.log(incorrectThree)
+    event.preventDefault();
+
+    this.state.instance.createQuestion(question, answer, incorrectOne, incorrectTwo, incorrectThree, { 
+      gas: 3000000,
+      from: this.state.account
+    });
   }
 
   render() {

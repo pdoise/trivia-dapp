@@ -1,0 +1,29 @@
+pragma solidity ^0.4.18;
+
+
+contract QuestionFactory {
+
+    event QuestionCreated(string question);
+
+    struct Question {
+        string question;
+        string answer;
+        string incorrectOne;
+        string incorrectTwo;
+        string incorrectTree;
+        bool approved;
+    }
+
+    Question[] public questions;
+
+    mapping (uint => address) public questionToOwner;
+    mapping (address => uint) ownerQuestionCount;
+
+    function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo, string _incorrectTree) public {
+        uint question = questions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo, _incorrectTree, false));
+ 
+        questionToOwner[question] = msg.sender;
+        QuestionCreated(_question);
+    }
+
+}

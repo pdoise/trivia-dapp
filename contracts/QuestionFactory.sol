@@ -16,7 +16,6 @@ contract QuestionFactory {
     Question[] public questions;
 
     mapping (uint => address) public questionToOwner;
-    mapping (address => uint) ownerQuestionCount;
 
     function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo) public {
         uint question = questions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo, false));

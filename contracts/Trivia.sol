@@ -5,7 +5,6 @@ import "./QuestionFactory.sol";
 contract Trivia is QuestionFactory {
     address public owner;
     uint public entryFee;
-    uint256 public totalFees;
     address[] public players;
 
     mapping(address => Player) public playerInfo;

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 import "./QuestionFactory.sol";
 
@@ -7,13 +7,13 @@ contract Trivia is QuestionFactory {
     address public owner;
     uint public entryFee;
     uint public answerCount;
+    uint public pot;
     address[] public players;
-    address[] public winners;
+    uint public maxPlayerCount;
 
     mapping(address => Player) public playerInfo;
 
     struct Player {
-        uint entryFee;
         string answer;
         uint wins;
         uint losses;
@@ -24,6 +24,7 @@ contract Trivia is QuestionFactory {
     constructor() public {
         owner = msg.sender;
         entryFee = 1;
+        maxPlayerCount = 100;
     }
 
     // Admin function to set a different entry fee
@@ -32,9 +33,10 @@ contract Trivia is QuestionFactory {
     }
 
     function payEntryFee() public payable transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
+        require(getPlayerCount() <= maxPlayerCount);
         require(!alreadyPlaying(msg.sender));
         require(msg.value >= entryFee);
-        playerInfo[msg.sender].entryFee = msg.value;
+        pot += msg.value;
         players.push(msg.sender);
     }
 
@@ -55,32 +57,27 @@ contract Trivia is QuestionFactory {
         }
     }
 
-    function determineWinners() public atStage(Stages.RevealQuestion) {      
-        uint count = 0;
+    function determineWinners() public payable atStage(Stages.RevealQuestion) {
+        address[] memory winners = new address[](maxPlayerCount);
+        uint winCount = 0;
+
         for (uint i = 0; i < getPlayerCount(); i++) {
             address player = players[i];
             if (keccak256(playerInfo[player].answer) == keccak256(questions[0].answer)) {
                 playerInfo[player].wins++;
-                winners.push(player);
-                count++;
+                winners[winCount] = player;
+                winCount++;
             } else {
                 playerInfo[player].losses++;
             }
         }
-        payWinners();
-    }
 
-    function payWinners() public payable atStage(Stages.RevealQuestion) {
-        uint earnings = setEarnings();
-
-        uint count = 0;
-        for (uint i = 0; i < winners.length; i++) {
-            winners[i].transfer(earnings);
+        uint earnings = pot / winCount;
+        for (uint j = 0; j < winners.length; j++) {
+            if(winners[j] != address(0)){
+              winners[j].transfer(earnings);
+            }
         }
-    }
-
-    function setEarnings() public atStage(Stages.RevealQuestion) returns(uint) {
-        return answerCount / winners.length;
     }
 
     function forceGameStart() public transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {

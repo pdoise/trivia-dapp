@@ -21,6 +21,7 @@ class App extends Component {
       playerCount: 0,
       playerWinCount: 0,
       playerLossCount: 0,
+      playerBalance: 0,
       question: '',
       correctAnswer: null,
       answers: [],
@@ -86,6 +87,7 @@ class App extends Component {
         return this.state.instance.getPlayerLosses.call();
       }).then((result) => {
         this.setState({playerLossCount: result.c[0]})
+      }).then((result) => {
         return this.state.instance.stage.call()
       }).then((result) => {
         this.setState({stage: result.c[0]})
@@ -137,7 +139,6 @@ class App extends Component {
 
   giveAnswer(answer, event) {
     event.preventDefault();
-    console.log(answer)
 
     this.state.instance.giveAnswer(answer, {
       gas: 3000000,
@@ -168,6 +169,7 @@ class App extends Component {
           <Row className="center-align" hidden={this.state.stage !== 0}>
             <h1>Play Trivia for {this.state.entryFee} ether</h1>
             <p>Bet ether amongst opponent players and split the pot amongst the winners</p>
+            <p>The next question will be revealed shortly</p>
             <Button
               onClick={(e) => this.payEntryFee(e)}>Join Now
             </Button>

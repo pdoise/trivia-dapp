@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 contract StateMachine {
 
@@ -12,9 +12,7 @@ contract StateMachine {
     uint public creationTime;
 
     modifier atStage(Stages _stage) {
-        require(
-            stage == _stage); 
-            _;
+        require(stage == _stage); _;
     }
 
     modifier transitionToReveal(uint _playerCount) {

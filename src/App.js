@@ -112,7 +112,7 @@ class App extends Component {
   joinGame(event) {
     event.preventDefault();
 
-    this.state.instance.payEntryFee(this.state.entryFee, { 
+    this.state.instance.payEntryFee({ 
       gas: 3000000,
       from: this.state.account,
       value: this.state.web3.toWei(this.state.entryFee, 'ether')

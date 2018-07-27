@@ -4,35 +4,9 @@ import "./QuestionFactory.sol";
 
 contract Trivia is QuestionFactory {
 
-    enum Stages {
-        AcceptingEntryFees,
-        RevealQuestion,
-        Complete
-    }
-
     address public owner;
     uint public entryFee;
     address[] public players;
-    Stages public stage;
-    uint public creationTime;
-
-    modifier atStage(Stages _stage) {
-        require(
-            stage == _stage); 
-            _;
-    }
-
-    modifier transitionToReveal() {
-        _;
-        if (stage == Stages.AcceptingEntryFees && now >= creationTime + 10 seconds && players.length > 1) {
-            stage = Stages.RevealQuestion;
-        }
-    }
-
-    modifier transitionAfter() {
-        _;
-        nextStage();
-    }
 
     mapping(address => Player) public playerInfo;
 
@@ -45,11 +19,9 @@ contract Trivia is QuestionFactory {
 
     modifier verifyOwner() {require(owner == msg.sender); _;}
 
-    function Trivia() public {
+    constructor() public {
         owner = msg.sender;
         entryFee = 1;
-        creationTime = now;
-        stage = Stages.AcceptingEntryFees;
         
         questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation", false));
         questions.push(Question("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT", false));
@@ -60,7 +32,7 @@ contract Trivia is QuestionFactory {
         entryFee = _entryFee;
     }
 
-    function payEntryFee(uint _entryFee) public payable transitionToReveal atStage(Stages.AcceptingEntryFees) {
+    function payEntryFee() public payable transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
         require(!alreadyPlaying(msg.sender));
         require(msg.value >= entryFee);
         playerInfo[msg.sender].entryFee = msg.value;
@@ -71,11 +43,11 @@ contract Trivia is QuestionFactory {
         stage = Stages(uint(stage) + 1);
     }
 
-    function reveal() public atStage(Stages.RevealQuestion) {
-        
-    }
+    //function reveal() public atStage(Stages.RevealQuestion) {
+    //    
+    //}
 
-    function alreadyPlaying(address player) public constant returns(bool) {
+    function alreadyPlaying(address player) public view returns(bool) {
         for (uint256 i = 0; i < players.length; i++) {
             if (players[i] == player) {
                 return true;
@@ -84,18 +56,18 @@ contract Trivia is QuestionFactory {
         return false;
     }
 
-    function giveAnswer(bool isCorrect) public {
-    }
+    //function giveAnswer(bool isCorrect) public {
+    //}
 
-    function getPlayerWins() public constant returns(uint) {
+    function getPlayerWins() public view returns(uint) {
         return playerInfo[msg.sender].wins;
     }
 
-    function getPlayerLosses() public constant returns(uint) {
+    function getPlayerLosses() public view returns(uint) {
         return playerInfo[msg.sender].losses;
     }
   
-    function getPlayerCount() public constant returns(uint) {
+    function getPlayerCount() public view returns(uint) {
         return players.length;
     }
 

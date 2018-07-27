@@ -1,7 +1,8 @@
 pragma solidity ^0.4.18;
 
+import "./StateMachine.sol";
 
-contract QuestionFactory {
+contract QuestionFactory is StateMachine {
 
     event QuestionCreated(string question);
 

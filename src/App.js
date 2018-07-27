@@ -80,6 +80,12 @@ class App extends Component {
         return this.state.instance.getPlayerCount.call();
       }).then((result) => {
         this.setState({playerCount: result.c[0]})
+        return this.state.instance.getPlayerWins.call();
+      }).then((result) => {
+        this.setState({playerWinCount: result.c[0]})
+        return this.state.instance.getPlayerLosses.call();
+      }).then((result) => {
+        this.setState({playerLossCount: result.c[0]})
         return this.state.instance.stage.call()
       }).then((result) => {
         this.setState({stage: result.c[0]})
@@ -133,7 +139,7 @@ class App extends Component {
     event.preventDefault();
     console.log(answer)
 
-    this.state.instance.forceGameStart(answer, {
+    this.state.instance.giveAnswer(answer, {
       gas: 3000000,
       from: this.state.account
     });

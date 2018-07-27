@@ -50,32 +50,37 @@ contract Trivia is QuestionFactory {
     function giveAnswer(string _answer) public atStage(Stages.RevealQuestion) {
         playerInfo[msg.sender].answer = _answer;
         answerCount++;
-
-        determineWinners();
+        if (answerCount >= getPlayerCount()) {
+            determineWinners();
+        }
     }
 
-    function determineWinners() public atStage(Stages.RevealQuestion) {
-        require(answerCount >= getPlayerCount());
-        
+    function determineWinners() public atStage(Stages.RevealQuestion) {      
         uint count = 0;
         for (uint i = 0; i < getPlayerCount(); i++) {
             address player = players[i];
             if (keccak256(playerInfo[player].answer) == keccak256(questions[0].answer)) {
-                winners[count] = player;
+                playerInfo[player].wins++;
+                winners.push(player);
                 count++;
+            } else {
+                playerInfo[player].losses++;
             }
-            delete playerInfo[player];
         }
         payWinners();
     }
 
-    function payWinners() public atStage(Stages.RevealQuestion) {
-        uint earnings = answerCount / winners.length;
+    function payWinners() public payable atStage(Stages.RevealQuestion) {
+        uint earnings = setEarnings();
 
         uint count = 0;
         for (uint i = 0; i < winners.length; i++) {
             winners[i].transfer(earnings);
         }
+    }
+
+    function setEarnings() public atStage(Stages.RevealQuestion) returns(uint) {
+        return answerCount / winners.length;
     }
 
     function forceGameStart() public transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {

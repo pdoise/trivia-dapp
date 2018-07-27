@@ -19,8 +19,8 @@ contract StateMachine {
 
     modifier transitionToReveal(uint _playerCount) {
         _;
-        if (stage == Stages.AcceptingEntryFees && now >= creationTime + 10 seconds && _playerCount > 1) {
-            stage = Stages.RevealQuestion;
+        if (stage == Stages.AcceptingEntryFees && now >= creationTime + 20 seconds && _playerCount > 0) {
+            nextStage();
         }
     }
 

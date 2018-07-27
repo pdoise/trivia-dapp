@@ -6,15 +6,17 @@ contract Trivia is QuestionFactory {
 
     address public owner;
     uint public entryFee;
+    uint public answerCount;
     address[] public players;
+    address[] public winners;
 
     mapping(address => Player) public playerInfo;
 
     struct Player {
-        uint256 entryFee;
-        uint256 answer;
-        uint256 wins;
-        uint256 losses;
+        uint entryFee;
+        string answer;
+        uint wins;
+        uint losses;
     }
 
     modifier verifyOwner() {require(owner == msg.sender); _;}
@@ -22,9 +24,6 @@ contract Trivia is QuestionFactory {
     constructor() public {
         owner = msg.sender;
         entryFee = 1;
-        
-        questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation", false));
-        questions.push(Question("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT", false));
     }
 
     // Admin function to set a different entry fee
@@ -39,16 +38,8 @@ contract Trivia is QuestionFactory {
         players.push(msg.sender);
     }
 
-    function nextStage() internal {
-        stage = Stages(uint(stage) + 1);
-    }
-
-    //function reveal() public atStage(Stages.RevealQuestion) {
-    //    
-    //}
-
     function alreadyPlaying(address player) public view returns(bool) {
-        for (uint256 i = 0; i < players.length; i++) {
+        for (uint i = 0; i < players.length; i++) {
             if (players[i] == player) {
                 return true;
             }
@@ -56,8 +47,40 @@ contract Trivia is QuestionFactory {
         return false;
     }
 
-    //function giveAnswer(bool isCorrect) public {
-    //}
+    function giveAnswer(string _answer) public atStage(Stages.RevealQuestion) {
+        playerInfo[msg.sender].answer = _answer;
+        answerCount++;
+
+        determineWinners();
+    }
+
+    function determineWinners() public atStage(Stages.RevealQuestion) {
+        require(answerCount >= getPlayerCount());
+        
+        uint count = 0;
+        for (uint i = 0; i < getPlayerCount(); i++) {
+            address player = players[i];
+            if (keccak256(playerInfo[player].answer) == keccak256(questions[0].answer)) {
+                winners[count] = player;
+                count++;
+            }
+            delete playerInfo[player];
+        }
+        payWinners();
+    }
+
+    function payWinners() public atStage(Stages.RevealQuestion) {
+        uint earnings = answerCount / winners.length;
+
+        uint count = 0;
+        for (uint i = 0; i < winners.length; i++) {
+            winners[i].transfer(earnings);
+        }
+    }
+
+    function forceGameStart() public transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
+        require(alreadyPlaying(msg.sender));
+    }
 
     function getPlayerWins() public view returns(uint) {
         return playerInfo[msg.sender].wins;

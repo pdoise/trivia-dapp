@@ -1,13 +1,15 @@
 import React, { Component } from 'react'
 import TriviaContract from '../build/contracts/Trivia.json'
 import getWeb3 from './utils/getWeb3'
-import { Button, Row, Col, CardPanel } from 'react-materialize';
+import { Footer, Button, Row, Col, CardPanel } from 'react-materialize';
 
 class App extends Component {
   constructor(props) {
     super(props)
-
-    this.joinGame = this.joinGame.bind(this);
+    
+    this.payEntryFee = this.payEntryFee.bind(this);
+    this.forceGameStart = this.forceGameStart.bind(this);
+    this.giveAnswer = this.giveAnswer.bind(this);
 
     this.state = {
       web3: null,
@@ -80,7 +82,6 @@ class App extends Component {
         this.setState({playerCount: result.c[0]})
         return this.state.instance.stage.call()
       }).then((result) => {
-        console.log(result.c[0])
         this.setState({stage: result.c[0]})
       })
       
@@ -109,13 +110,32 @@ class App extends Component {
     this.setState({answerButtons: answerButtons});
   }
 
-  joinGame(event) {
+  payEntryFee(event) {
     event.preventDefault();
 
     this.state.instance.payEntryFee({ 
       gas: 3000000,
       from: this.state.account,
       value: this.state.web3.toWei(this.state.entryFee, 'ether')
+    });
+  }
+
+  forceGameStart(event) {
+    event.preventDefault();
+
+    this.state.instance.forceGameStart({
+      gas: 3000000,
+      from: this.state.account
+    });
+  }
+
+  giveAnswer(answer, event) {
+    event.preventDefault();
+    console.log(answer)
+
+    this.state.instance.forceGameStart(answer, {
+      gas: 3000000,
+      from: this.state.account
     });
   }
 
@@ -126,14 +146,14 @@ class App extends Component {
           <Row>
             <Col m={6} s={12}>
               <CardPanel className="teal lighten-4 black-text">
-                <strong>Game Info</strong>
+                <strong>Game Info:</strong>
                 <div>The Entry Fee is: {this.state.entryFee} ether</div>
                 <div>Number of players: {this.state.playerCount}</div>
               </CardPanel>
             </Col>
             <Col m={6} s={12}>
               <CardPanel className="teal lighten-4 black-text">
-                <strong>Player Info</strong>
+                <strong>Player Info:</strong>
                 <div>Wins: {this.state.playerWinCount}</div>
                 <div>Losses: {this.state.playerLossCount}</div>
               </CardPanel>
@@ -141,9 +161,9 @@ class App extends Component {
           </Row>
           <Row className="center-align" hidden={this.state.stage !== 0}>
             <h1>Play Trivia for {this.state.entryFee} ether</h1>
-            <p>At least two players required to start game</p>
+            <p>Bet ether amongst opponent players and split the pot amongst the winners</p>
             <Button
-              onClick={(e) => this.joinGame(e)}>Join Now
+              onClick={(e) => this.payEntryFee(e)}>Join Now
             </Button>
           </Row>
           <Row className="center-align" hidden={this.state.stage !== 1}>
@@ -151,6 +171,19 @@ class App extends Component {
             {this.state.answerButtons}
           </Row>
         </main>
+        <Footer>
+          <div hidden={this.state.stage !== 0}>
+            <Button
+              onClick={(e) => this.forceGameStart(e)}>Force game to start
+            </Button>
+            <ul>
+              <li>A minimum of two players is required to start the game.</li>
+              <li>The game will wait roughly 20 seconds after each question to allow time for players to join.</li>
+              <li>The first person to join after the time has passed will incur the gas cost and start the game.</li>
+              <li>If the time has passed and you are tired of waiting for the next player you can incur the gas price yourself and force the game to start.</li>
+            </ul>
+          </div>
+        </Footer>
       </div>
     );
   }

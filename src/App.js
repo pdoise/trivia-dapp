@@ -10,6 +10,7 @@ class App extends Component {
     this.payEntryFee = this.payEntryFee.bind(this);
     this.forceGameStart = this.forceGameStart.bind(this);
     this.giveAnswer = this.giveAnswer.bind(this);
+    this.payPlayer = this.payPlayer.bind(this);
 
     this.state = {
       web3: null,
@@ -24,6 +25,8 @@ class App extends Component {
       playerBalance: 0,
       question: '',
       correctAnswer: null,
+      playerAnsweredCorrectly: false,
+      playerEarnings: 0,
       answers: [],
       answerButtons: [],
       stage: 0
@@ -81,13 +84,18 @@ class App extends Component {
         return this.state.instance.getPlayerCount.call();
       }).then((result) => {
         this.setState({playerCount: result.c[0]})
-        return this.state.instance.getPlayerWins.call();
+      return this.state.instance.getPlayerWins.call(this.state.account);
       }).then((result) => {
         this.setState({playerWinCount: result.c[0]})
-        return this.state.instance.getPlayerLosses.call();
+        return this.state.instance.getPlayerLosses.call(this.state.account);
       }).then((result) => {
         this.setState({playerLossCount: result.c[0]})
+        return this.state.instance.earnings.call();
       }).then((result) => {
+        this.setState({playerEarnings: result.c[0]})
+        return this.state.instance.playerAnsweredCorrectly.call(this.state.account);
+      }).then((result) => {
+        this.setState({playerAnsweredCorrectly: result})
         return this.state.instance.stage.call()
       }).then((result) => {
         this.setState({stage: result.c[0]})
@@ -146,6 +154,15 @@ class App extends Component {
     });
   }
 
+  payPlayer(event) {
+    event.preventDefault();
+
+    this.state.instance.payPlayer({
+      gas: 3000000,
+      from: this.state.account
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -177,6 +194,17 @@ class App extends Component {
           <Row className="center-align" hidden={this.state.stage !== 1}>
             <h1>{this.state.question}</h1>
             {this.state.answerButtons}
+          </Row>
+          <Row className="center-align" hidden={this.state.stage !== 2}>
+          <div hidden={!this.state.playerAnsweredCorrectly}>
+            <h1>Correct! You won {this.state.playerEarnings/10000} ether.</h1>
+            <Button
+              onClick={(e) => this.payPlayer(e)}>Claim Winnings
+            </Button>
+          </div>
+          <div className="center-align" hidden={this.state.playerAnsweredCorrectly}>
+            <h1>Incorrect! Better Luck next time.</h1>
+          </div>
           </Row>
         </main>
         <Footer>

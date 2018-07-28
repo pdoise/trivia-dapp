@@ -15,12 +15,15 @@ contract QuestionFactory is StateMachine {
     }
     
     Question[] public questions;
+    Question public currentQuestion;
 
     mapping (uint => address) public questionToOwner;
 
-    constructor() public {        
+    constructor() public { 
         questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation", false));
         questions.push(Question("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT", false));
+
+        currentQuestion = questions[0];
     }
 
     function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo) public {

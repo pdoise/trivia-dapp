@@ -4,15 +4,14 @@ import "./QuestionFactory.sol";
 
 contract Trivia is QuestionFactory {
 
-    address public owner;
-    uint public entryFee;
-    uint public answerCount;
-    uint public pot;
     address[] public players;
+    uint private round;
+    uint public entryFee;
+    uint private answerCount;
+    uint private pot;
     uint public earnings;
     uint public winCount;
-    uint public paidCount;
-    uint public round;
+    uint private paidCount;
 
     mapping(address => Player) public playerInfo;
 
@@ -23,10 +22,7 @@ contract Trivia is QuestionFactory {
         bool answeredCorrectly;
     }
 
-    modifier verifyOwner() {require(owner == msg.sender); _;}
-
     constructor() public {
-        owner = msg.sender;
         entryFee = 1;
         round = 0;
     }
@@ -36,7 +32,7 @@ contract Trivia is QuestionFactory {
         entryFee = _entryFee;
     }
 
-    function payEntryFee() public payable transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
+    function payEntryFee() external payable transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
         require(!alreadyPlaying(msg.sender));
         require(msg.value >= entryFee);
         playerInfo[msg.sender].answer = '';
@@ -54,7 +50,7 @@ contract Trivia is QuestionFactory {
         return false;
     }
 
-    function giveAnswer(string _answer) public atStage(Stages.RevealQuestion) {
+    function giveAnswer(string _answer) external atStage(Stages.RevealQuestion) {
         playerInfo[msg.sender].answer = _answer;
         answerCount++;
         if (answerCount >= getPlayerCount()) {
@@ -62,7 +58,7 @@ contract Trivia is QuestionFactory {
         }
     }
 
-    function determineWinners() public payable transitionAfter() atStage(Stages.RevealQuestion) {
+    function determineWinners() private transitionToComplete() atStage(Stages.RevealQuestion) {
         winCount = 0;
         
         for (uint i = 0; i < getPlayerCount(); i++) {
@@ -79,7 +75,7 @@ contract Trivia is QuestionFactory {
         earnings = pot / winCount;
     }
 
-    function payPlayer() public payable atStage(Stages.Complete) {
+    function payPlayer() external payable atStage(Stages.Complete) {
         if (playerInfo[msg.sender].answeredCorrectly){
           msg.sender.transfer(earnings);
           paidCount++;
@@ -99,9 +95,10 @@ contract Trivia is QuestionFactory {
         round++;
         currentQuestion = questions[round];
         stage = Stages.AcceptingEntryFees;
+        creationTime = now;
     }
 
-    function forceGameStart() public transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
+    function forceGameStart() external transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
         require(alreadyPlaying(msg.sender));
     }
 

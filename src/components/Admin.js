@@ -8,6 +8,8 @@ class Admin extends Component {
     super(props)
 
     this.setEntryFee = this.setEntryFee.bind(this);
+    this.acceptUnapprovedQuestion = this.acceptUnapprovedQuestion.bind(this);
+    this.rejectUnapprovedQuestion = this.rejectUnapprovedQuestion.bind(this);
 
     this.state = {
       web3: null,
@@ -17,7 +19,8 @@ class Admin extends Component {
       owner: null,
       isOwner: false,
       entryFee: 0,
-      updateState: null
+      updateState: null,
+      unapprovedQuestion: ""
     }
   }
 
@@ -42,7 +45,7 @@ class Admin extends Component {
     //Set init state variables
     this.state.web3.eth.getAccounts((error, accounts) => {
       trivia.deployed().then((instance) => {
-        return this.setState({ account: accounts[0], contract: trivia, instance: instance })
+        this.setState({ account: accounts[0], contract: trivia, instance: instance })
       })
     })
   }
@@ -64,6 +67,10 @@ class Admin extends Component {
         return this.state.instance.owner.call();
       }).then((result) => {
         this.setState({owner: result});
+        return this.state.instance.getUnapprovedQuestion.call();
+      }).then((result) => {
+        console.log(result)
+        this.setState({unapprovedQuestion: result});
       })
       // For testing when changing accounts
       if (this.state.web3.eth.accounts[0] !== this.state.account) {
@@ -86,12 +93,30 @@ class Admin extends Component {
     })
   }
 
+  acceptUnapprovedQuestion(){
+    event.preventDefault();
+
+    this.state.instance.acceptUnapprovedQuestion(this.state.unapprovedQuestion[0], {
+      gas: 3000000,
+      from: this.state.account
+    });
+  }
+
+  rejectUnapprovedQuestion(){
+    event.preventDefault();
+
+    this.state.instance.rejectUnapprovedQuestion(this.state.unapprovedQuestion[0], {
+      gas: 3000000,
+      from: this.state.account
+    });
+  }
+
   render() {
     return (
       <div className="App">
         <main className="container">
           <form onSubmit={this.setEntryFee}>
-            <p>Admin Funtions:</p>
+            <h3>Admin Funtions:</h3>
             <Input 
               s={3}
               id="entryfee" 
@@ -100,6 +125,15 @@ class Admin extends Component {
               placeholder="Set Entry Fee in ether" />
             <Button>Submit</Button>
           </form>
+          <div><br /><br />
+            <strong>Unapproved questions:</strong>
+            <p>{this.state.unapprovedQuestion[0]}</p>
+            <p>{this.state.unapprovedQuestion[1]}</p>
+            <p>{this.state.unapprovedQuestion[2]}</p>
+            <p>{this.state.unapprovedQuestion[3]}</p>
+            <Button onClick={(e) => this.acceptUnapprovedQuestion(e)}>Approve Question</Button><br /><br />
+            <Button onClick={(e) => this.rejectUnapprovedQuestion(e)}>Reject Question</Button>
+          </div>
         </main>
       </div>
     );

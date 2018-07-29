@@ -7,9 +7,12 @@ contract StateMachine {
         RevealQuestion,
         Complete
     }
-
+    
+    address public owner;
     Stages public stage;
     uint public creationTime;
+
+    modifier verifyOwner() {require(owner == msg.sender); _;}
 
     modifier atStage(Stages _stage) {
         require(stage == _stage); _;
@@ -22,12 +25,15 @@ contract StateMachine {
         }
     }
 
-    modifier transitionAfter() {
+    modifier transitionToComplete() {
         _;
-        nextStage();
+        if (stage == Stages.RevealQuestion && now >= creationTime + 50 seconds) {
+            nextStage();
+        }
     }
 
     constructor() public {
+        owner = msg.sender;
         creationTime = now;
         stage = Stages.AcceptingEntryFees;
     }

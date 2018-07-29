@@ -55,7 +55,7 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       trivia.deployed().then((instance) => {
         this.setState({ account: accounts[0], contract: trivia, instance: instance })
-        return this.state.instance.questions.call(0);
+        return this.state.instance.currentQuestion.call();
       }).then((result) => {
         this.setState({ question: result[0], correctAnswer: result[1], answers: shuffleArray(result.splice(1,3)) })
       })

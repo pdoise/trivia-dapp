@@ -11,75 +11,43 @@ contract QuestionFactory is StateMachine {
         string answer;
         string incorrectOne;
         string incorrectTwo;
-        bool approved;
     }
     
     Question[] public questions;
+    Question[] public unapprovedQuestions;
     Question public currentQuestion;
 
     mapping (uint => address) public questionToOwner;
 
     constructor() public {
-        questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation", true));
-        questions.push(Question("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT", true));
-        questions.push(Question("What is the currency of Brazil?", "The Bhat", "Real", "Krona", false));
-        questions.push(Question("What is the Capital of Colorado", "Denver", "Colorado Springs", "Boulder", false));
+        questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation"));
+        questions.push(Question("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT"));
+        createQuestion("What is the currency of Brazil?", "The Bhat", "Real", "Krona");
+        createQuestion("What is the Capital of Colorado", "Denver", "Colorado Springs", "Boulder");
 
         currentQuestion = questions[0];
     }
 
     function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo) public {
-        uint question = questions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo, false));
+        uint question = unapprovedQuestions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo));
  
         questionToOwner[question] = msg.sender;
         emit QuestionCreated(_question);
     }
 
-    function getUnapprovedQuestion() public view verifyOwner() returns(string, string, string, string) {
-        Question memory result;
-        uint counter = 0;
-        for (uint i = 0; i < questions.length; i++) {
-            if (questions[i].approved == false) {
-                result = questions[i];
-                break;
-            }
-            counter++;
-        }
-        return (result.question, result.answer, result.incorrectOne, result.incorrectTwo);
+    function approveQuestion() public verifyOwner() {
+        require(unapprovedQuestions.length > 0);
+        questions.push(unapprovedQuestions[0]);
+        removeUnapprovedQuestion();
     }
 
-    function acceptUnapprovedQuestion() public verifyOwner() {
-        uint counter = 0;
-        for (uint i = 0; i < questions.length; i++) {
-            if (questions[i].approved == false) {
-                questions[i].approved = true;
-                return;
-            }
-            counter++;
+    function removeUnapprovedQuestion() public verifyOwner() {
+        require(unapprovedQuestions.length > 0);
+        for (uint i = 0; i < unapprovedQuestions.length - 1; i++) {
+          unapprovedQuestions[0] = unapprovedQuestions[0 + 1];
         }
-    }
-
-    function rejectUnapprovedQuestion() public verifyOwner() {
-        uint currentIndex;
-        uint counter = 0;
-
-        for (uint i = 0; i < questions.length; i++) {
-            if (questions[i].approved == false) {
-                currentIndex = i;
-                break;
-            }
-            counter++;
-        }
-
-        if (currentIndex >= questions.length) return;
-
-        for (uint j = 0; j<questions.length-1; j++){
-            questions[j] = questions[j+1];
-        }
-
-        delete questions[questions.length-1];
-        questions.length--;
-
+        delete unapprovedQuestions[unapprovedQuestions.length - 1];
+        unapprovedQuestions.length--;
     }
 
 }

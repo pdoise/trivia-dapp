@@ -8,7 +8,7 @@ class Admin extends Component {
     super(props)
 
     this.setEntryFee = this.setEntryFee.bind(this);
-    this.acceptUnapprovedQuestion = this.acceptUnapprovedQuestion.bind(this);
+    this.approveQuestion = this.approveQuestion.bind(this);
     this.rejectUnapprovedQuestion = this.rejectUnapprovedQuestion.bind(this);
 
     this.state = {
@@ -67,9 +67,8 @@ class Admin extends Component {
         return this.state.instance.owner.call();
       }).then((result) => {
         this.setState({owner: result});
-        return this.state.instance.getUnapprovedQuestion.call();
+        return this.state.instance.unapprovedQuestions.call(0);
       }).then((result) => {
-        console.log(result)
         this.setState({unapprovedQuestion: result});
       })
       // For testing when changing accounts
@@ -93,10 +92,10 @@ class Admin extends Component {
     })
   }
 
-  acceptUnapprovedQuestion(){
+  approveQuestion(){
     event.preventDefault();
 
-    this.state.instance.acceptUnapprovedQuestion(this.state.unapprovedQuestion[0], {
+    this.state.instance.approveQuestion(this.state.unapprovedQuestion[0], {
       gas: 3000000,
       from: this.state.account
     });
@@ -131,7 +130,7 @@ class Admin extends Component {
             <p>{this.state.unapprovedQuestion[1]}</p>
             <p>{this.state.unapprovedQuestion[2]}</p>
             <p>{this.state.unapprovedQuestion[3]}</p>
-            <Button onClick={(e) => this.acceptUnapprovedQuestion(e)}>Approve Question</Button><br /><br />
+            <Button onClick={(e) => this.approveQuestion(e)}>Approve Question</Button><br /><br />
             <Button onClick={(e) => this.rejectUnapprovedQuestion(e)}>Reject Question</Button>
           </div>
         </main>

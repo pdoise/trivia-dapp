@@ -83,7 +83,7 @@ class Admin extends Component {
   forceNextStage(event) {
     event.preventDefault();
 
-    this.state.instance.forceGameStart({
+    this.state.instance.forceNextStage({
       gas: 3000000,
       from: this.state.account
     });

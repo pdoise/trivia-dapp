@@ -2,17 +2,18 @@ pragma solidity ^0.4.24;
 
 contract StateMachine {
 
+    address public owner;
+    uint private balance;
+    Stages public stage;
+    uint public creationTime;
+
     enum Stages {
         AcceptingEntryFees,
         RevealQuestion,
         Complete
     }
-    
-    address public owner;
-    Stages public stage;
-    uint public creationTime;
 
-    modifier verifyOwner() {assert(owner == msg.sender); _;}
+    modifier verifyOwner() {require(owner == msg.sender); _;}
 
     modifier atStage(Stages _stage) {
         assert(stage == _stage); _;
@@ -27,23 +28,31 @@ contract StateMachine {
     
     modifier transitionToComplete() {
         _;
-        if (stage == Stages.RevealQuestion && now >= creationTime + 40 seconds) {
+        if (stage == Stages.RevealQuestion && now >= creationTime + 30 seconds) {
             nextStage();
         }
     }
     
     modifier transitionToAcceptingFees() {
         _;
-        if (stage == Stages.Complete && now >= creationTime + 60 seconds) {
-            nextStage();
+        if (stage == Stages.Complete && now >= creationTime + 40 seconds) {
+            stage = Stages.AcceptingEntryFees;
         }
     }
-
 
     constructor() public {
         owner = msg.sender;
         creationTime = now;
         stage = Stages.AcceptingEntryFees;
+    }
+
+    // Fallback Functions
+    function() public payable {
+        balance += msg.value;
+    }
+    
+    function kill() verifyOwner() {
+        selfdestruct(owner);
     }
 
     function nextStage() internal {

@@ -4,7 +4,9 @@ import "./StateMachine.sol";
 
 contract QuestionFactory is StateMachine {
 
-    event QuestionCreated(string question);
+    Question[] public questions; //TODO Make this private
+    Question[] public unapprovedQuestions;
+    Question public currentQuestion;
 
     struct Question {
         string question;
@@ -12,12 +14,10 @@ contract QuestionFactory is StateMachine {
         string incorrectOne;
         string incorrectTwo;
     }
-    
-    Question[] public questions;
-    Question[] public unapprovedQuestions;
-    Question public currentQuestion;
 
     mapping (uint => address) public questionToOwner;
+
+    event QuestionCreated(string question);
 
     constructor() public {
         createQuestion("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation");
@@ -30,7 +30,7 @@ contract QuestionFactory is StateMachine {
 
         currentQuestion = questions[0];
     }
-
+    
     function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo) public {
         uint id = unapprovedQuestions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo)) - 1;
  

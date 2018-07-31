@@ -23,6 +23,10 @@ contract Trivia is QuestionFactory {
         bool paid;
     }
 
+    event EntryFeePaid(uint pot);
+    event AnswerSubmitted(string answer);
+    event PlayerPaid(uint earnings);
+
     constructor() public {
         entryFee = 1;
         round = 0;
@@ -46,6 +50,8 @@ contract Trivia is QuestionFactory {
 
         pot += msg.value;
         players.push(msg.sender);
+
+        emit EntryFeePaid(pot);
     }
 
     function giveAnswer(string _answer) external atStage(Stages.RevealQuestion) {
@@ -56,6 +62,8 @@ contract Trivia is QuestionFactory {
         if (answerCount >= getPlayerCount()) {
             determineWinners();
         }
+        
+        emit AnswerSubmitted(_answer);
     }
 
     function payPlayer() external payable atStage(Stages.Complete) {
@@ -67,13 +75,19 @@ contract Trivia is QuestionFactory {
         msg.sender.transfer(earnings);
         paidCount++;
 
+        emit PlayerPaid(earnings);
+
         if (paidCount >= winCount) {
             resetGame();
         }
     }
 
     function forceNextStage() external verifyOwner() {
-        nextStage();
+        if (stage != Stages.Complete) {
+            nextStage();
+        } else {
+            stage = Stages.AcceptingEntryFees;
+        }
     }
 
     function playerAnsweredCorrectly(address _address) public view returns(bool) {

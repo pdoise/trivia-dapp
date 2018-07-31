@@ -12,10 +12,10 @@ contract StateMachine {
     Stages public stage;
     uint public creationTime;
 
-    modifier verifyOwner() {require(owner == msg.sender); _;}
+    modifier verifyOwner() {assert(owner == msg.sender); _;}
 
     modifier atStage(Stages _stage) {
-        require(stage == _stage); _;
+        assert(stage == _stage); _;
     }
 
     modifier transitionToReveal(uint _playerCount) {
@@ -24,13 +24,21 @@ contract StateMachine {
             nextStage();
         }
     }
-
+    
     modifier transitionToComplete() {
         _;
-        if (stage == Stages.RevealQuestion && now >= creationTime + 50 seconds) {
+        if (stage == Stages.RevealQuestion && now >= creationTime + 40 seconds) {
             nextStage();
         }
     }
+    
+    modifier transitionToAcceptingFees() {
+        _;
+        if (stage == Stages.Complete && now >= creationTime + 60 seconds) {
+            nextStage();
+        }
+    }
+
 
     constructor() public {
         owner = msg.sender;

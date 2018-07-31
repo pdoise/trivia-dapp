@@ -20,6 +20,7 @@ contract Trivia is QuestionFactory {
         uint wins;
         uint losses;
         bool answeredCorrectly;
+        bool paid;
     }
 
     constructor() public {
@@ -34,14 +35,64 @@ contract Trivia is QuestionFactory {
 
     function payEntryFee() external payable transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
         require(!alreadyPlaying(msg.sender));
+        require(!isQuestionOwner());
+        require(owner != msg.sender);
+        require(questions.length >= 1);
         require(msg.value >= entryFee);
-        playerInfo[msg.sender].answer = '';
+
+        playerInfo[msg.sender].answer = "";
         playerInfo[msg.sender].answeredCorrectly = false;
+        playerInfo[msg.sender].paid = false;
+
         pot += msg.value;
         players.push(msg.sender);
     }
 
-    function alreadyPlaying(address player) public view returns(bool) {
+    function giveAnswer(string _answer) external atStage(Stages.RevealQuestion) {
+        require(alreadyPlaying(msg.sender));
+
+        playerInfo[msg.sender].answer = _answer;
+        answerCount++;
+        if (answerCount >= getPlayerCount()) {
+            determineWinners();
+        }
+    }
+
+    function payPlayer() external payable atStage(Stages.Complete) {
+        require(alreadyPlaying(msg.sender));
+        require(playerInfo[msg.sender].answeredCorrectly);
+        require(!playerInfo[msg.sender].paid);
+
+        playerInfo[msg.sender].paid = true;
+        msg.sender.transfer(earnings);
+        paidCount++;
+
+        if (paidCount >= winCount) {
+            resetGame();
+        }
+    }
+
+    function forceNextStage() external verifyOwner() {
+        nextStage();
+    }
+
+    function playerAnsweredCorrectly(address _address) public view returns(bool) {
+        return playerInfo[_address].answeredCorrectly;
+    }
+
+    function getPlayerWins(address _address) public view returns(uint) {
+        return playerInfo[_address].wins;
+    }
+
+    function getPlayerLosses(address _address) public view returns(uint) {
+        return playerInfo[_address].losses;
+    }
+
+    function getPlayerCount() public view returns(uint) {
+        return players.length;
+    }
+
+    function alreadyPlaying(address player) private view returns(bool) {
         for (uint i = 0; i < players.length; i++) {
             if (players[i] == player) {
                 return true;
@@ -50,12 +101,13 @@ contract Trivia is QuestionFactory {
         return false;
     }
 
-    function giveAnswer(string _answer) external atStage(Stages.RevealQuestion) {
-        playerInfo[msg.sender].answer = _answer;
-        answerCount++;
-        if (answerCount >= getPlayerCount()) {
-            determineWinners();
+    function isQuestionOwner() private view returns(bool) {
+        for (uint i = 0; i < questions.length; i++) {
+            if (questionToOwner[i] == msg.sender) {
+                return true;
+            }
         }
+        return false;
     }
 
     function determineWinners() private transitionToComplete() atStage(Stages.RevealQuestion) {
@@ -75,18 +127,7 @@ contract Trivia is QuestionFactory {
         earnings = pot / winCount;
     }
 
-    function payPlayer() external payable atStage(Stages.Complete) {
-        if (playerInfo[msg.sender].answeredCorrectly){
-          msg.sender.transfer(earnings);
-          paidCount++;
-        }
-
-        if (paidCount >= winCount ) {
-            resetGame();
-        }
-    }
-
-    function resetGame() private atStage(Stages.Complete) {
+    function resetGame() private transitionToAcceptingFees() atStage(Stages.Complete) {
         delete players;
         delete paidCount;
         delete winCount;
@@ -94,28 +135,7 @@ contract Trivia is QuestionFactory {
         delete pot;
         round++;
         currentQuestion = questions[round];
-        stage = Stages.AcceptingEntryFees;
         creationTime = now;
-    }
-
-    function forceGameStart() external transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
-        require(alreadyPlaying(msg.sender));
-    }
-
-    function playerAnsweredCorrectly(address _address) public view returns(bool) {
-        return playerInfo[_address].answeredCorrectly;
-    }
-
-    function getPlayerWins(address _address) public view returns(uint) {
-        return playerInfo[_address].wins;
-    }
-
-    function getPlayerLosses(address _address) public view returns(uint) {
-        return playerInfo[_address].losses;
-    }
-
-    function getPlayerCount() public view returns(uint) {
-        return players.length;
     }
 
 }

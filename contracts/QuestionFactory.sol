@@ -20,18 +20,21 @@ contract QuestionFactory is StateMachine {
     mapping (uint => address) public questionToOwner;
 
     constructor() public {
-        questions.push(Question("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation"));
-        questions.push(Question("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT"));
+        createQuestion("Sciophobia is the fear of what?", "Shadows", "Eating", "Transportation");
+        createQuestion("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT");
         createQuestion("What is the currency of Brazil?", "The Bhat", "Real", "Krona");
         createQuestion("What is the Capital of Colorado", "Denver", "Colorado Springs", "Boulder");
+
+        approveQuestion();
+        approveQuestion();
 
         currentQuestion = questions[0];
     }
 
     function createQuestion(string _question, string _answer, string _incorrectOne, string _incorrectTwo) public {
-        uint question = unapprovedQuestions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo));
+        uint id = unapprovedQuestions.push(Question(_question, _answer, _incorrectOne, _incorrectTwo)) - 1;
  
-        questionToOwner[question] = msg.sender;
+        questionToOwner[id] = msg.sender;
         emit QuestionCreated(_question);
     }
 

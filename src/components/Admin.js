@@ -7,6 +7,7 @@ class Admin extends Component {
   constructor(props) {
     super(props)
 
+    this.forceNextStage = this.forceNextStage.bind(this);
     this.setEntryFee = this.setEntryFee.bind(this);
     this.approveQuestion = this.approveQuestion.bind(this);
     this.rejectUnapprovedQuestion = this.rejectUnapprovedQuestion.bind(this);
@@ -79,6 +80,15 @@ class Admin extends Component {
     }
   }
 
+  forceNextStage(event) {
+    event.preventDefault();
+
+    this.state.instance.forceGameStart({
+      gas: 3000000,
+      from: this.state.account
+    });
+  }
+
   setEntryFee(event){
     event.preventDefault();
     const data = new FormData(event.target);
@@ -114,8 +124,20 @@ class Admin extends Component {
     return (
       <div className="App">
         <main className="container">
+          <h3>Admin Funtions:</h3>
+          <div>
+            <ul>
+              <li>There are situations where the game is waiting on a requirement to be met before it will change state.</li>
+              <li>Examples of this are not enough players, players not answering the questions or not collecting thier winnings.</li>
+              <li>Due to time limits requireing a tx you as an admin can force the next stage to begin if the game becomes stuck.</li>
+            </ul>
+            <Button
+              onClick={(e) => this.forceNextStage(e)}>Force Next Stage
+            </Button>
+          </div>
+          
+          <p>Set the starting amount required to play:</p>
           <form onSubmit={this.setEntryFee}>
-            <h3>Admin Funtions:</h3>
             <Input 
               s={3}
               id="entryfee" 

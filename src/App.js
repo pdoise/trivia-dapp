@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
 import TriviaContract from '../build/contracts/Trivia.json'
 import getWeb3 from './utils/getWeb3'
-import { Footer, Button, Row, Col, CardPanel } from 'react-materialize';
+import { Button, Row, Col, CardPanel } from 'react-materialize';
 
 class App extends Component {
   constructor(props) {
     super(props)
     
     this.payEntryFee = this.payEntryFee.bind(this);
-    this.forceGameStart = this.forceGameStart.bind(this);
     this.giveAnswer = this.giveAnswer.bind(this);
     this.payPlayer = this.payPlayer.bind(this);
 
@@ -136,15 +135,6 @@ class App extends Component {
     });
   }
 
-  forceGameStart(event) {
-    event.preventDefault();
-
-    this.state.instance.forceGameStart({
-      gas: 3000000,
-      from: this.state.account
-    });
-  }
-
   giveAnswer(answer, event) {
     event.preventDefault();
 
@@ -207,19 +197,6 @@ class App extends Component {
           </div>
           </Row>
         </main>
-        <Footer>
-          <div hidden={this.state.stage !== 0}>
-            <Button
-              onClick={(e) => this.forceGameStart(e)}>Force game to start
-            </Button>
-            <ul>
-              <li>A minimum of two players is required to start the game.</li>
-              <li>The game will wait roughly 20 seconds after each question to allow time for players to join.</li>
-              <li>The first person to join after the time has passed will incur the gas cost and start the game.</li>
-              <li>If the time has passed and you are tired of waiting for the next player you can incur the gas price yourself and force the game to start.</li>
-            </ul>
-          </div>
-        </Footer>
       </div>
     );
   }

@@ -176,6 +176,7 @@ class App extends Component {
           <Row className="center-align" hidden={this.state.stage !== 0}>
             <h1>Play Trivia for {this.state.entryFee} ether</h1>
             <p>Bet ether amongst opponent players and split the pot amongst the winners</p>
+            <p>At least two players required to reveal next question</p>
             <p>The next question will be revealed shortly</p>
             <Button
               onClick={(e) => this.payEntryFee(e)}>Join Now

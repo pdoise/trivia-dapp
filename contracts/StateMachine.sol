@@ -35,7 +35,7 @@ contract StateMachine {
     
     modifier transitionToAcceptingFees() {
         _;
-        if (stage == Stages.Complete && now >= creationTime + 40 seconds) {
+        if (stage == Stages.Complete) {
             stage = Stages.AcceptingEntryFees;
         }
     }

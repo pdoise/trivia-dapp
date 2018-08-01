@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./QuestionFactory.sol";
+import "./PlayerHelper.sol";
 
-contract Trivia is QuestionFactory {
+// note set gas to 30000000 in remix to run contract
+contract Trivia is PlayerHelper {
 
-    address[] public players;
     uint private round;
     uint public entryFee;
     uint private answerCount;
@@ -12,16 +12,6 @@ contract Trivia is QuestionFactory {
     uint public earnings;
     uint public winCount;
     uint private paidCount;
-
-    mapping(address => Player) public playerInfo;
-
-    struct Player {
-        string answer;
-        uint wins;
-        uint losses;
-        bool answeredCorrectly;
-        bool paid;
-    }
 
     event EntryFeePaid(uint pot);
     event AnswerSubmitted(string answer);
@@ -86,42 +76,8 @@ contract Trivia is QuestionFactory {
         if (stage != Stages.Complete) {
             nextStage();
         } else {
-            stage = Stages.AcceptingEntryFees;
+            resetGame();
         }
-    }
-
-    function playerAnsweredCorrectly(address _address) public view returns(bool) {
-        return playerInfo[_address].answeredCorrectly;
-    }
-
-    function getPlayerWins(address _address) public view returns(uint) {
-        return playerInfo[_address].wins;
-    }
-
-    function getPlayerLosses(address _address) public view returns(uint) {
-        return playerInfo[_address].losses;
-    }
-
-    function getPlayerCount() public view returns(uint) {
-        return players.length;
-    }
-
-    function alreadyPlaying(address player) private view returns(bool) {
-        for (uint i = 0; i < players.length; i++) {
-            if (players[i] == player) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function isQuestionOwner() private view returns(bool) {
-        for (uint i = 0; i < questions.length; i++) {
-            if (questionToOwner[i] == msg.sender) {
-                return true;
-            }
-        }
-        return false;
     }
 
     function determineWinners() private transitionToComplete() atStage(Stages.RevealQuestion) {
@@ -137,8 +93,12 @@ contract Trivia is QuestionFactory {
                 playerInfo[player].losses++;
             }
         }
-
-        earnings = pot / winCount;
+        
+        if (winCount == 0) {
+            owner.transfer(pot);
+        } else {
+            earnings = pot / winCount;
+        }
     }
 
     function resetGame() private transitionToAcceptingFees() atStage(Stages.Complete) {

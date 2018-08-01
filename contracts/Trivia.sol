@@ -8,6 +8,7 @@ contract Trivia is PlayerHelper {
     uint private round;
     uint public entryFee;
     uint private answerCount;
+    Question public question;
     uint private pot;
     uint public earnings;
     uint public winCount;
@@ -20,6 +21,7 @@ contract Trivia is PlayerHelper {
     constructor() public {
         entryFee = 1;
         round = 0;
+        question = currentQuestion;
     }
 
     // Admin function to set a different entry fee
@@ -40,6 +42,7 @@ contract Trivia is PlayerHelper {
 
         pot += msg.value;
         players.push(msg.sender);
+        setQuestion();
 
         emit EntryFeePaid(pot);
     }
@@ -78,6 +81,10 @@ contract Trivia is PlayerHelper {
         } else {
             resetGame();
         }
+    }
+
+    function setQuestion() private atStage(Stages.AcceptingEntryFees) {
+        question = currentQuestion;
     }
 
     function determineWinners() private transitionToComplete() atStage(Stages.RevealQuestion) {

@@ -4,9 +4,9 @@ import "./StateMachine.sol";
 
 contract QuestionFactory is StateMachine {
 
-    Question[] public questions; //TODO Make this private
+    Question[] internal questions;
     Question[] public unapprovedQuestions;
-    Question public currentQuestion;
+    Question internal currentQuestion;
 
     struct Question {
         string question;

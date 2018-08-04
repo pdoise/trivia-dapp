@@ -7,9 +7,9 @@ contract Trivia is PlayerHelper {
 
     uint private round;
     uint public entryFee;
-    uint private answerCount;
+    uint public answerCount;
     Question public question;
-    uint private pot;
+    uint public pot;
     uint public earnings;
     uint public winCount;
     uint private paidCount;

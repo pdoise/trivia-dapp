@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
+//import "./oraclize/usingOraclize.sol";
 
+//contract StateMachine is usingOraclize {
 contract StateMachine {
 
     address public owner;
@@ -51,7 +53,7 @@ contract StateMachine {
         balance += msg.value;
     }
     
-    function kill() verifyOwner() {
+    function kill() public verifyOwner() {
         selfdestruct(owner);
     }
 

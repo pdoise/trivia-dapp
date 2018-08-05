@@ -53,4 +53,11 @@ contract QuestionFactory is StateMachine {
         unapprovedQuestions.length--;
     }
 
+    function getQuestionsCount() public view returns(uint) {
+        return questions.length;
+    }
+
+    function getUnapprovedQuestionsCount() public view returns(uint) {
+        return unapprovedQuestions.length;
+    }
 }

@@ -1,5 +1,7 @@
 const Trivia = artifacts.require('./Trivia.sol')
 
+//Due to the nature of the state machine and to not duplicate code, contracts StateMachine.sol,
+//PlayerHelper.sol and Trivia.sol will all be tested in this file. Trivia.sol inherits from all of them.
 contract('Trivia', function(accounts) {
 
   var owner = accounts[0];
@@ -18,9 +20,14 @@ contract('Trivia', function(accounts) {
     const trivia = await Trivia.deployed()
     const initPlayerCount = await trivia.getPlayerCount.call()
     const initPot = await trivia.pot.call()
+    var playerOneInfo = await trivia.playerInfo.call(playerOne);
 
     assert.equal(initPlayerCount.c[0], 0, "Expect player count to be 0 on init")
     assert.equal(initPot.c[0], 0, "Expect pot to be 0 on init")
+    assert.equal(playerOneInfo[1].c[0], 0, "player wins init value should be 0")
+    assert.equal(playerOneInfo[2].c[0], 0, "player lossess init value should be 0")
+    assert.equal(playerOneInfo[3], false, "player answered correctly init value should be false")
+    assert.equal(playerOneInfo[4], false, "player paid init value should be false")
 
     var eventEmitted = false
     var event = trivia.EntryFeePaid()

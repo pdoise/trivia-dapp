@@ -60,7 +60,7 @@ class QuestionSubmit extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div>
         <main className="container">
           <form onSubmit={this.submitQuestion}>
             <p>Submit your own question:</p>

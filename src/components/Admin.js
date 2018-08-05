@@ -10,7 +10,7 @@ class Admin extends Component {
     this.forceNextStage = this.forceNextStage.bind(this);
     this.setEntryFee = this.setEntryFee.bind(this);
     this.approveQuestion = this.approveQuestion.bind(this);
-    this.rejectUnapprovedQuestion = this.rejectUnapprovedQuestion.bind(this);
+    this.removeUnapprovedQuestion = this.removeUnapprovedQuestion.bind(this);
 
     this.state = {
       web3: null,
@@ -111,10 +111,10 @@ class Admin extends Component {
     });
   }
 
-  rejectUnapprovedQuestion(){
+  removeUnapprovedQuestion(){
     event.preventDefault();
 
-    this.state.instance.rejectUnapprovedQuestion(this.state.unapprovedQuestion[0], {
+    this.state.instance.removeUnapprovedQuestion(this.state.unapprovedQuestion[0], {
       gas: 3000000,
       from: this.state.account
     });
@@ -122,7 +122,7 @@ class Admin extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div>
         <main className="container">
           <h3>Admin Funtions:</h3>
           <div>
@@ -153,7 +153,7 @@ class Admin extends Component {
             <p>{this.state.unapprovedQuestion[2]}</p>
             <p>{this.state.unapprovedQuestion[3]}</p>
             <Button onClick={(e) => this.approveQuestion(e)}>Approve Question</Button><br /><br />
-            <Button onClick={(e) => this.rejectUnapprovedQuestion(e)}>Reject Question</Button>
+            <Button onClick={(e) => this.removeUnapprovedQuestion(e)}>Reject Question</Button>
           </div>
         </main>
       </div>

@@ -64,7 +64,7 @@ contract QuestionFactory is StateMachine {
     function removeUnapprovedQuestion() public verifyOwner() {
         require(unapprovedQuestions.length > 0);
         for (uint i = 0; i < unapprovedQuestions.length - 1; i++) {
-          unapprovedQuestions[0] = unapprovedQuestions[0 + 1];
+          unapprovedQuestions[i] = unapprovedQuestions[i + 1];
         }
         delete unapprovedQuestions[unapprovedQuestions.length - 1];
         unapprovedQuestions.length--;

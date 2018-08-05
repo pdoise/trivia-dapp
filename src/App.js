@@ -26,7 +26,7 @@ class App extends Component {
       correctAnswer: null,
       playerAnsweredCorrectly: false,
       playerEarnings: 0,
-      answers: [],
+      answers: ["foo", "bar", "baz"],
       answerButtons: [],
       stage: 0
     }
@@ -54,11 +54,8 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       trivia.deployed().then((instance) => {
         this.setState({ account: accounts[0], contract: trivia, instance: instance })
-        return this.state.instance.question.call();
-      }).then((result) => {
-        this.setState({ question: result[0], correctAnswer: result[1], answers: shuffleArray(result.splice(1,3)) })
       })
-    })    
+    })
   }
 
   componentDidMount() {
@@ -98,6 +95,11 @@ class App extends Component {
         return this.state.instance.stage.call()
       }).then((result) => {
         this.setState({stage: result.c[0]})
+        return this.state.instance.question.call();
+      }).then((result) => {
+        if (result[0] !== "" && this.state.question !== result[0]) {
+            this.setState({question: result[0], correctAnswer: result[1], answers: shuffleArray(result.splice(1,3))})
+        }
       })
       
       // Check if current user is owner of the contract

@@ -154,7 +154,9 @@ contract Trivia is PlayerHelper {
         delete answerCount;
         delete pot;
         round++;
-        currentQuestion = questions[round];
+        if (questions.length >= round) {
+          currentQuestion = questions[round];
+        }
         creationTime = now;
     }
 

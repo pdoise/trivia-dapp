@@ -19,7 +19,7 @@
   1. Run `truffle test` to execute the unit tests
   
 ## Description
-The intention is a trivia game that asks one question every ~60 seconds. Players pay a predetermined entree fee to play the game and then persons that answer the question correctly share the overall pot whilst people that answered incorrectly lose thier fee. There are three stages:
+The intention is a trivia game that asks one question every ~60 seconds. Players pay a predetermined entry fee to play the game and then persons that answer the question correctly share the overall pot whilst people that answered incorrectly lose thier fee. There are three stages:
 1. Accepting bids: This stage allows up to ~20 seconds to allow time for players to join.
 2. Question reveal: This stage reveals the question and allows players ~10 seconds to answer the question.
 3. Complete: This stage tallies up winners and losers and distributes the pot accordingly.
@@ -42,5 +42,5 @@ A player cannot participate in game where the player is the one who created the 
 
 ## ToDo
 1. Incentivize a player to create an interesting question by offering a reward if it is accepted.
-2. Use a third party to pay tx fees to enforce time constraints on the state machine (avoids owner being in charge of stage changes).
+2. Use a third party to pay tx fees to enforce time constraints on the state machine (avoids owner being in charge of stage changes when the app fails to do so).
 3. Owner should get a small fee of players entry fees.

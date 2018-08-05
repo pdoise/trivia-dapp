@@ -26,6 +26,10 @@ contract Trivia is PlayerHelper {
     /// @notice Notify when player recieves earnings
     event PlayerPaid(uint earnings);
 
+    /// @notice Stop function in case of emercengy
+    /// @dev Circuit breaker
+    modifier stopInEmergency { require(!stopped); _; }
+
     /// @notice Set entry fee to 1 eth, start round counter
     constructor() public {
         entryFee = 1;
@@ -40,7 +44,8 @@ contract Trivia is PlayerHelper {
 
     /// @notice Pay to play this round of trivia
     /// @dev Move to next stage with transitionToReveal if conditions are met, can only call function in AcceptingEntryFees stage
-    function payEntryFee() external payable transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
+    function payEntryFee() external payable stopInEmergency 
+        transitionToReveal(getPlayerCount()) atStage(Stages.AcceptingEntryFees) {
         /// @dev Validate that user has not already paid entry fee and is not the person who created the question 
         require(!alreadyPlaying(msg.sender));
         require(!isQuestionOwner());

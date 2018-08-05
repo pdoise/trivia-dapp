@@ -11,6 +11,7 @@ contract StateMachine is usingOraclize {
     uint private balance;
     Stages public stage;
     uint public creationTime;
+    bool public stopped;
 
     enum Stages {
         AcceptingEntryFees,
@@ -56,6 +57,7 @@ contract StateMachine is usingOraclize {
         owner = msg.sender;
         creationTime = now;
         stage = Stages.AcceptingEntryFees;
+        stopped = false;
     }
 
     /// @dev Fallback Function
@@ -66,6 +68,12 @@ contract StateMachine is usingOraclize {
     /// @dev Self Destruct Contract
     function kill() public verifyOwner() {
         selfdestruct(owner);
+    }
+
+    /// @notice Admin function to stop certain functions in an emergency
+    /// @dev Circuit breaker that allows contract functionality to be stopped
+    function circuitBreaker(bool _stopped) external verifyOwner() {
+        stopped = _stopped;
     }
 
     /// @notice Move to stage of the game

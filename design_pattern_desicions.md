@@ -22,7 +22,7 @@ Some examples are:
 3. removeUnapprovedQuestion - Only contract owner can reject user submitted questions
 
 ## Fail early and fail loud
-Require statements and modifiers are used where ever possible in lou of if statements.
+Require statements and modifiers are used where ever possible in lieu of if statements.
 
 ## Mortal 
 Implemented the mortal design pattern which gives the ability to destroy the contract and remove it from the blockchain.

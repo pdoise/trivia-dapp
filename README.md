@@ -32,7 +32,7 @@ Contract owner and Players.
 Contract owner: The contract owner is responsible for creating questions, approving user submited questions and enforcing time constraints if the app fails to do so. 
 The pot is split by all players who answered correctly. If no player answer correctly the pot goes to the owner.
 The owner also determines the entry fee which players will have to pay to play for the next question.
-The owner is incentivized by making the questions fun (not too easy not to difficult) and approving questions of the same nature.
+The owner is incentivized by making the questions fun (not too easy not to difficult) and approving questions of the same nature to increase user base.
 The owner is not allowed to play as the owner has knowledge of all the correct answers.
 
 Player: A player can join the game in the first stage by paying the entry fee. In the next stage they will answer a trivia question.

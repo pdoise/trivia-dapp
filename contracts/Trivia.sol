@@ -38,7 +38,7 @@ contract Trivia is PlayerHelper {
 
     /// @notice Admin function to set a different entry fee
     /// @dev Need to be able to change entry fee after contract creation
-    function setEntryFee(uint _entryFee) external verifyOwner() {
+    function setEntryFee(uint _entryFee) external onlyOwner() {
         entryFee = _entryFee;
     }
 
@@ -90,7 +90,7 @@ contract Trivia is PlayerHelper {
         /// @dev Make sure player is in the game, was not paid already and answered correctly
         require(alreadyPlaying(msg.sender));
         require(!playerInfo[msg.sender].paid);
-        require(playerInfo[msg.sender].answeredCorrectly);
+        require(playerAnsweredCorrectly(msg.sender));
         /// @dev Set player info paid to true to protect against reentry attack
         playerInfo[msg.sender].paid = true;
         /// @dev transfer earnings to current player and increment paid count
@@ -110,7 +110,7 @@ contract Trivia is PlayerHelper {
     /// @dev This should be remedied in the future, maybe an external app that can ensure tx fees are paid at the correct times
     /// @dev Examples are if no users joins after 20 seconds, a player never answers the question or does not collect earnings
     /// @dev If this happens the contract owner has the power to increment the next stage to keep the game going
-    function forceNextStage() external verifyOwner() {
+    function forceNextStage() external onlyOwner() {
         if (stage != Stages.Complete) {
             nextStage();
         } else {

@@ -19,7 +19,7 @@ contract('QuestionFactory', function(accounts) {
         eventEmitted = true
     })
 
-    await questionFactory.createQuestion("foobar", "foo", "bar", "baz", { gas: 3000000, from: playerOne})
+    await questionFactory.createQuestion("foobar", "foo", "bar", "baz", { from: playerOne})
     unapprovedQuestionCount = await questionFactory.getUnapprovedQuestionsCount.call()
     
     assert.equal(unapprovedQuestionCount.c[0], initUnapprovedQuestionCount.c[0]+1, "creating question should increment unapproved questions array")
@@ -35,7 +35,7 @@ contract('QuestionFactory', function(accounts) {
     initUnapprovedQuestionCount = await questionFactory.getUnapprovedQuestionsCount.call()
     initQuestionCount = await questionFactory.getQuestionsCount.call()
 
-    await questionFactory.approveQuestion({gas: 3000000, from: owner})
+    await questionFactory.approveQuestion({from: owner})
     unapprovedQuestionCount = await questionFactory.getUnapprovedQuestionsCount.call()
     questionCount = await questionFactory.getQuestionsCount.call()
     
@@ -51,7 +51,7 @@ contract('QuestionFactory', function(accounts) {
 
     initUnapprovedQuestionCount = await questionFactory.getUnapprovedQuestionsCount.call()
 
-    await questionFactory.removeUnapprovedQuestion({gas: 3000000, from: owner})
+    await questionFactory.removeUnapprovedQuestion({from: owner})
     unapprovedQuestionCount = await questionFactory.getUnapprovedQuestionsCount.call()
     
     assert.equal(unapprovedQuestionCount.c[0], initUnapprovedQuestionCount.c[0]-1, "rejecting a question should decrease unapproved questions array")
@@ -64,7 +64,7 @@ contract('QuestionFactory', function(accounts) {
     let err = null
 
     try {
-      await questionFactory.removeUnapprovedQuestion({gas: 3000000, from: playerOne})
+      await questionFactory.removeUnapprovedQuestion({from: playerOne})
     } catch (error) {
       err = error
     }
@@ -79,7 +79,7 @@ contract('QuestionFactory', function(accounts) {
     let err = null
 
     try {
-      await questionFactory.approveQuestion({gas: 3000000, from: playerOne})
+      await questionFactory.approveQuestion({from: playerOne})
     } catch (error) {
       err = error
     }

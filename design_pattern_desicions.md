@@ -14,7 +14,7 @@ The second stage (questionReveal) requires ~20 to move to the next stage. The at
 The second stage (Complete) requires players to accept thier winnings to move to the next stage. The atStage modifier ensures that the function payPlayer can only be called in this stage. The last player to claim thier reward triggers the next stage.
 
 ## Restricting Access
-A modifier called verifyOwner is used to restrict access to particular functions.
+A modifier called onlyOwner is used to restrict access to particular functions.
 
 Some examples are:
 1. ForceNextStage - Only contract owner can force the state machine to transition to the next stage

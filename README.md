@@ -10,6 +10,7 @@
 1. ```ganache-cli```
 1. Open new tab in terminal then:
 1. ```cd trivia-dapp```
+1. ```npm install```
 1. ```truffle compile```
 1. ```truffle migrate```
 1. ```npm run start```

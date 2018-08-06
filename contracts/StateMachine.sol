@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 import "./oraclize/usingOraclize.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /// @title A solidity timed state machine
 /// @author Phillip Doise
 /// @dev To better understand this contract see: http://solidity.readthedocs.io/en/v0.4.24/common-patterns.html#state-machine
 /// @dev Importing ethPm Oraclize with future intent to use it for updating stage by time conditions
-contract StateMachine is usingOraclize {
+contract StateMachine is usingOraclize, Ownable {
 
-    address public owner;
     uint private balance;
     Stages public stage;
     uint public creationTime;
@@ -18,9 +18,6 @@ contract StateMachine is usingOraclize {
         RevealQuestion,
         Complete
     }
-
-    /// @notice Modifier to ensure method is called by owner of the contract
-    modifier verifyOwner() {require(owner == msg.sender); _;}
 
     /// @notice Modifier to ensure method can only be called on the current stage
     modifier atStage(Stages _stage) {
@@ -54,7 +51,6 @@ contract StateMachine is usingOraclize {
 
     /// @notice Set owner of the contract, Set state machine creation time to now, set the first stage
     constructor() public {
-        owner = msg.sender;
         creationTime = now;
         stage = Stages.AcceptingEntryFees;
         stopped = false;
@@ -66,13 +62,13 @@ contract StateMachine is usingOraclize {
     }
     
     /// @dev Self Destruct Contract
-    function kill() public verifyOwner() {
+    function kill() public onlyOwner() {
         selfdestruct(owner);
     }
 
     /// @notice Admin function to stop certain functions in an emergency
     /// @dev Circuit breaker that allows contract functionality to be stopped
-    function circuitBreaker(bool _stopped) external verifyOwner() {
+    function circuitBreaker(bool _stopped) external onlyOwner() {
         stopped = _stopped;
     }
 

@@ -53,7 +53,7 @@ contract QuestionFactory is StateMachine {
 
     /// @notice Contract owner approves question for use
     /// @dev remove first item from unapprovedQuestions array and add it to the questions array
-    function approveQuestion() public verifyOwner() {
+    function approveQuestion() public onlyOwner() {
         require(unapprovedQuestions.length > 0);
         questions.push(unapprovedQuestions[0]);
         removeUnapprovedQuestion();
@@ -61,7 +61,7 @@ contract QuestionFactory is StateMachine {
 
     /// @notice Reject unapproved questions
     /// @dev Remove first item from unapprovedQuestions array while retaining array ordering
-    function removeUnapprovedQuestion() public verifyOwner() {
+    function removeUnapprovedQuestion() public onlyOwner() {
         require(unapprovedQuestions.length > 0);
         for (uint i = 0; i < unapprovedQuestions.length - 1; i++) {
           unapprovedQuestions[i] = unapprovedQuestions[i + 1];

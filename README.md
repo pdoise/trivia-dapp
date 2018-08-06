@@ -45,3 +45,4 @@ A player cannot participate in game where the player is the one who created the 
 1. Incentivize a player to create an interesting question by offering a reward if it is accepted.
 2. Use a third party to pay tx fees to enforce time constraints on the state machine (avoids owner being in charge of stage changes when the app fails to do so).
 3. Owner should get a small fee of players entry fees.
+4. Set up an admin type user to allow owner to delegate responsibilities.

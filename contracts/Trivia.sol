@@ -49,16 +49,16 @@ contract Trivia is PlayerHelper {
         /// @dev Validate that user has not already paid entry fee and is not the person who created the question 
         require(!alreadyPlaying(msg.sender));
         require(!isQuestionOwner());
-        /// @dev Validate that user is not the contract owner, that there is a question to play and the tx value covers the entry fee 
+        /// @dev Validate that user is not the contract owner, that there is a question to play for next round and the tx value covers the entry fee 
         require(owner != msg.sender);
-        require(questions.length >= 1);
+        require(questions.length - 1 > round);
         require(msg.value >= entryFee);
         /// @dev Reset relevent player info from previous round
         playerInfo[msg.sender].answer = "";
         playerInfo[msg.sender].answeredCorrectly = false;
         playerInfo[msg.sender].paid = false;
 
-        /// @dev Add entry fee to pot and push player to playes array
+        /// @dev Add entry fee to pot and push player to players array
         pot += msg.value;
         players.push(msg.sender);
         setQuestion();
@@ -159,9 +159,7 @@ contract Trivia is PlayerHelper {
         delete answerCount;
         delete pot;
         round++;
-        if (questions.length >= round) {
-          currentQuestion = questions[round];
-        }
+        currentQuestion = questions[round];
         creationTime = now;
     }
 

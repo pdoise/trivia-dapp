@@ -30,7 +30,9 @@ contract QuestionFactory is StateMachine {
         createQuestion("Which is the youngest American city?", "Jacksonville, NC", "Paramount, CA", "Layton, UT");
         createQuestion("What is the currency of Brazil?", "The Bhat", "Real", "Krona");
         createQuestion("What is the Capital of Colorado", "Denver", "Colorado Springs", "Boulder");
+        createQuestion("Which of the following countries is landlocked?", "Switzerland", "France", "Italy");
 
+        approveQuestion();
         approveQuestion();
         approveQuestion();
 

@@ -1,6 +1,6 @@
 # Perpetual Decentralized Trivia
 ## Tool Chain 
-[node v7.9.0/npm 5.6.0/Truffle v4.1.13/ganache-cli v6.1.6]
+[node v8.11.1/npm 5.6.0/Truffle v4.1.13/ganache-cli v6.1.6]
 
 ## Getting started
 1. git clone https://github.com/pdoise/trivia-dapp.git

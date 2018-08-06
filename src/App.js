@@ -21,7 +21,6 @@ class App extends Component {
       playerCount: 0,
       playerWinCount: 0,
       playerLossCount: 0,
-      playerBalance: 0,
       question: '',
       correctAnswer: null,
       playerAnsweredCorrectly: false,
@@ -163,6 +162,7 @@ class App extends Component {
             <Col m={6} s={12}>
               <CardPanel className="teal lighten-4 black-text">
                 <strong>Game Info:</strong>
+                <div>{this.state.owner}</div>
                 <div>The Entry Fee is: {this.state.entryFee} ether</div>
                 <div>Number of players: {this.state.playerCount}</div>
               </CardPanel>
@@ -170,6 +170,7 @@ class App extends Component {
             <Col m={6} s={12}>
               <CardPanel className="teal lighten-4 black-text">
                 <strong>Player Info:</strong>
+                <div>{this.state.account}</div>
                 <div>Wins: {this.state.playerWinCount}</div>
                 <div>Losses: {this.state.playerLossCount}</div>
               </CardPanel>

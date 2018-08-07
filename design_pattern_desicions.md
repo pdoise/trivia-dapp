@@ -3,6 +3,8 @@
 ## Description
 Please review the README.md for a description on how the game works and the different user stories to better understand the design patterns
 
+## Libraries
+This project uses Open Zeppelin for libraries such as Ownable for battle tested functions from an outside library for reliability. Oracalize is implemented as well with plans to use it to enhance the project in the future.
 
 ## State Machine
 A state machine pattern is used to manage the 3 stages of the game. 

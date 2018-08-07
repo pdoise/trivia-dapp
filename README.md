@@ -46,3 +46,6 @@ A player cannot participate in game where the player is the one who created the 
 2. Use a third party to pay tx fees to enforce time constraints on the state machine (avoids owner being in charge of stage changes when the app fails to do so).
 3. Owner should get a small fee of players entry fees.
 4. Set up an admin type user to allow owner to delegate responsibilities.
+
+## Troubleshooting
+I sometimes run into issues where a tx wont go through or the app doesn't update. Switching metamask from the  private network to a test network and then back again, then running 'truffle migrate --reset' usually gets things back to normal for me.

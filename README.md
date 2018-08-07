@@ -47,5 +47,13 @@ A player cannot participate in game where the player is the one who created the 
 3. Owner should get a small fee of players entry fees.
 4. Set up an admin type user to allow owner to delegate responsibilities.
 
-## Troubleshooting
+## Troubleshooting and UI Testing
+'truffle migrate --reset' will set the game back to its original state.
+
+To test I open up metamask and create new accounts to serve as players. Account 1 cannot play, so I use account two and join game, switch to account 3 and join game ect.. until the game starts. After, I cycle the accounts and answer the questions for each account that is playing. Then collect earnings from winners on the last stage for each account that answered correctly. You can always force the next stage if you switch to Account 1 and go to the admin tab if it gets hung up for whatever reason.
+
+The game will stop if it does not have at least two approved questions ready to go. Remedy this by approving questions as Account 1 and creating new questions as any account.
+
+The UI does not display validation errors from the smart contract. If meta mask fails check the contract and make sure your not failing on conditionals or modifiers.
+
 I sometimes run into issues where a tx wont go through or the app doesn't update. Switching metamask from the  private network to a test network and then back again, then running 'truffle migrate --reset' usually gets things back to normal for me.
